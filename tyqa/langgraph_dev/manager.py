@@ -84,7 +84,8 @@ class LanggraphRuntimePaths:
 # ``~/.config/tyqa/`` layout; tests override ``RUNTIME`` with
 # :meth:`LanggraphRuntimePaths.for_directory` to point at a temp dir
 # without touching the user's real home directory.
-DEFAULT_PID_DIR = Path.home() / ".config" / "tyqa"
+DEFAULT_PID_DIR = Path.cwd() / ".config" / "tyqa"
+DEFAULT_PID_DIR = Path.cwd() / ".config" / "evoscientist"
 RUNTIME: LanggraphRuntimePaths = LanggraphRuntimePaths.for_directory(DEFAULT_PID_DIR)
 
 
