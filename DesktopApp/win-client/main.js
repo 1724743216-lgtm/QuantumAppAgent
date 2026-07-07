@@ -147,8 +147,6 @@ function startBackend() {
       if (!portReady) {
         const logPath = path.join(app.getPath('userData'), 'backend_crash.log');
         fs.writeFileSync(logPath, backendErrorLog || 'No error log. Exit code: ' + code);
-        dialog.showErrorBox('后端服务崩溃', `后端服务过早退出 (退出码: ${code})\n\n错误信息：\n${backendErrorLog.substring(0, 500)}\n\n完整日志已保存至: ${logPath}`);
-        app.quit();
       }
     });
 
@@ -162,7 +160,7 @@ function startBackend() {
 
     // Wait for the backend port to be ready
     const checkPort = () => {
-      if (isDead) return reject(new Error("Backend process died before port was ready"));
+      if (isDead) return reject(new Error(`Backend process died before port was ready.\nBackend Log:\n${backendErrorLog.substring(0, 800)}`));
       const socket = new net.Socket();
       socket.setTimeout(1000);
       socket.on('connect', () => {
@@ -209,17 +207,11 @@ function startServer() {
 
     serverProcess.on('exit', (code) => {
       isServerDead = true;
-      if (!serverPortReady) {
-        dialog.showErrorBox('前端服务崩溃', `前端服务过早退出 (退出码: ${code})\n请检查前端环境是否正常。`);
-        app.quit();
-      }
     });
 
     serverProcess.on('error', (err) => {
       isServerDead = true;
       console.error('Failed to start server:', err);
-      dialog.showErrorBox('启动失败', '无法启动前端 Node.js 服务。\n' + err.message);
-      app.quit();
       reject(err);
     });
 
@@ -294,7 +286,7 @@ app.whenReady().then(async () => {
     createWindow();
   } catch (error) {
     console.error('Could not start services:', error);
-    dialog.showErrorBox('启动失败', '无法启动后台服务，请检查日志。');
+    dialog.showErrorBox('启动失败', `无法启动服务:\n${error.message}\n\n请截图此窗口发给开发者。`);
     app.quit();
   }
 
