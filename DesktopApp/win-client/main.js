@@ -3,12 +3,12 @@ const { fork, spawn, execSync } = require('child_process');
 const path = require('path');
 const net = require('net');
 const fs = require('fs');
+const tar = require('tar');
 
 let mainWindow;
 let splashWindow;
 let serverProcess;
 let backendProcess;
-let tarProcess;
 const PORT = 4716;
 const BACKEND_PORT = 6174;
 
@@ -58,25 +58,20 @@ function ensurePythonEnv() {
       return resolve();
     }
 
-    console.log('Extracting Python environment...');
+    console.log('Extracting Python environment using npm tar...');
     if (splashWindow && !splashWindow.isDestroyed()) {
       splashWindow.webContents.executeJavaScript(`document.getElementById('status').innerText = '首次启动，正在解压运行环境 (约需1-2分钟)，请耐心等待...'`);
     }
 
-    tarProcess = spawn('tar', ['-xf', 'backend_python.tar'], { cwd: backendDir, windowsHide: true });
-    
-    tarProcess.on('close', (code) => {
-      tarProcess = null;
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(new Error(`tar extraction failed with code ${code}`));
-      }
-    });
-
-    tarProcess.on('error', (err) => {
-      reject(err);
-    });
+    try {
+      await tar.x({
+        file: tarPath,
+        cwd: backendDir
+      });
+      resolve();
+    } catch (err) {
+      reject(new Error(`Node tar extraction failed: ${err.message}`));
+    }
   });
 }
 
@@ -300,9 +295,6 @@ app.on('window-all-closed', function () {
 });
 
 app.on('quit', () => {
-  if (tarProcess) {
-    tarProcess.kill();
-  }
   if (serverProcess) {
     serverProcess.kill();
   }
