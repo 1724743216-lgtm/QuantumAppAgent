@@ -48,7 +48,7 @@ function createSplashWindow() {
 }
 
 function ensurePythonEnv() {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     if (!app.isPackaged) return resolve();
     const backendDir = path.join(process.resourcesPath, 'backend');
     const pythonDir = path.join(backendDir, 'backend_python');
