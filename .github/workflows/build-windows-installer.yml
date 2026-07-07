@@ -1,0 +1,45 @@
+name: Build Windows Installer
+
+on:
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install uv (Python Package Manager)
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Setup Python
+        run: uv python install 3.12
+
+      - name: Install Python Backend Dependencies
+        run: |
+          uv venv
+          uv sync
+
+      - name: Install Electron Dependencies
+        working-directory: DesktopApp/win-client
+        run: npm install
+
+      - name: Build Windows NSIS Installer
+        working-directory: DesktopApp/win-client
+        run: npm run build:win
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Tianyan-Quantum-AI-Installer
+          path: DesktopApp/win-client/dist/*.exe

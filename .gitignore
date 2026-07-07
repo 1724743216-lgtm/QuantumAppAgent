@@ -52,3 +52,9 @@ conversation_history/
 *meals/
 botpy.log
 large_tool_results/
+DesktopApp/win-client/node_modules/
+DesktopApp/win-client/dist/
+DesktopApp/win-client/frontend/node_modules/
+DesktopApp/win-client/frontend/.next/
+DesktopApp/Tianyan_Quantum_AI-darwin-x64/
+DesktopApp/Tianyan_Quantum_AI-win32-x64/

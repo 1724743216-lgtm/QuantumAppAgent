@@ -1,0 +1,53 @@
+{
+  "name": "tianyan-quantum-ai",
+  "version": "1.0.0",
+  "description": "Tianyan Quantum AI Desktop Client",
+  "main": "main.js",
+  "scripts": {
+    "build:win": "electron-builder --win --x64"
+  },
+  "build": {
+    "appId": "com.tianyan.quantum.ai",
+    "productName": "Tianyan Quantum AI",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js"
+    ],
+    "extraResources": [
+      {
+        "from": "frontend",
+        "to": "frontend",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "../../",
+        "to": "backend",
+        "filter": [
+          "**/*",
+          "!.git${/*}",
+          "!DesktopApp${/*}",
+          "!DesktopApp",
+          "!.github${/*}",
+          "!.vscode${/*}",
+          "!dist${/*}"
+        ]
+      }
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Tianyan Quantum AI"
+    }
+  },
+  "devDependencies": {
+    "electron": "^29.0.0",
+    "electron-builder": "^24.9.1"
+  }
+}
