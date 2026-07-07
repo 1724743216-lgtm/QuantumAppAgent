@@ -47,27 +47,50 @@ function createSplashWindow() {
 }
 
 function ensurePythonEnv() {
-  if (!app.isPackaged) return;
-  const backendDir = path.join(process.resourcesPath, 'backend');
-  const pythonDir = path.join(backendDir, 'backend_python');
-  const tarPath = path.join(backendDir, 'backend_python.tar');
+  return new Promise((resolve, reject) => {
+    if (!app.isPackaged) return resolve();
+    const backendDir = path.join(process.resourcesPath, 'backend');
+    const pythonDir = path.join(backendDir, 'backend_python');
+    const tarPath = path.join(backendDir, 'backend_python.tar');
 
-  if (!fs.existsSync(pythonDir) && fs.existsSync(tarPath)) {
-    console.log('Extracting Python environment...');
-    try {
-      // Windows 10+ includes tar
-      execSync('tar -xf backend_python.tar', { cwd: backendDir, windowsHide: true });
-    } catch (err) {
-      console.error('Failed to extract Python environment:', err);
-      dialog.showErrorBox('初始化失败', '无法解压运行环境，请尝试以管理员身份运行。');
-      app.quit();
+    if (fs.existsSync(pythonDir) || !fs.existsSync(tarPath)) {
+      return resolve();
     }
-  }
+
+    console.log('Extracting Python environment...');
+    if (splashWindow && !splashWindow.isDestroyed()) {
+      splashWindow.webContents.executeJavaScript(`document.getElementById('status').innerText = '首次启动，正在解压运行环境 (约需1-2分钟)，请耐心等待...'`);
+    }
+
+    const tarProcess = spawn('tar', ['-xf', 'backend_python.tar'], { cwd: backendDir, windowsHide: true });
+    
+    tarProcess.on('close', (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`tar extraction failed with code ${code}`));
+      }
+    });
+
+    tarProcess.on('error', (err) => {
+      reject(err);
+    });
+  });
 }
 
 function startBackend() {
-  return new Promise((resolve, reject) => {
-    ensurePythonEnv();
+  return new Promise(async (resolve, reject) => {
+    try {
+      await ensurePythonEnv();
+    } catch (err) {
+      dialog.showErrorBox('初始化失败', '无法解压运行环境，请尝试以管理员身份运行。\\n' + err.message);
+      app.quit();
+      return reject(err);
+    }
+
+    if (splashWindow && !splashWindow.isDestroyed()) {
+      splashWindow.webContents.executeJavaScript(`document.getElementById('status').innerText = '正在启动核心服务...'`);
+    }
 
     // If packaged, backend env is inside resources/backend/.venv
     const backendDir = app.isPackaged 
@@ -97,6 +120,7 @@ function startBackend() {
       env.PATH = `${backendScriptsDir};${backendPythonDir};${env.PATH || ''}`;
     }
 
+    let backendErrorLog = '';
     backendProcess = spawn(pythonExe, args, {
       cwd: backendDir,
       env: env,
@@ -109,16 +133,33 @@ function startBackend() {
     });
 
     backendProcess.stderr.on('data', (data) => {
-      console.error(`Backend stderr: ${data}`);
+      const str = data.toString();
+      backendErrorLog += str;
+      console.error(`Backend stderr: ${str}`);
+    });
+
+    let isDead = false;
+    backendProcess.on('exit', (code) => {
+      isDead = true;
+      if (code !== 0 && code !== null) {
+        const logPath = path.join(app.getPath('userData'), 'backend_crash.log');
+        fs.writeFileSync(logPath, backendErrorLog);
+        dialog.showErrorBox('后端服务崩溃', \`后端服务异常退出 (错误码: \${code})\\n\\n错误信息：\\n\${backendErrorLog.substring(0, 500)}\\n\\n完整日志已保存至: \${logPath}\`);
+        app.quit();
+      }
     });
 
     backendProcess.on('error', (err) => {
+      isDead = true;
       console.error('Failed to start backend:', err);
+      dialog.showErrorBox('启动失败', '无法启动 Python 后端进程。\\n' + err.message);
+      app.quit();
       reject(err);
     });
 
     // Wait for the backend port to be ready
     const checkPort = () => {
+      if (isDead) return reject(new Error("Backend process died before port was ready"));
       const socket = new net.Socket();
       socket.setTimeout(1000);
       socket.on('connect', () => {
