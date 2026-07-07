@@ -37,11 +37,11 @@ bridge/package-lock.json
 # Project specific
 .langgraph_api/
 .bg_processes/
-workspace/
-skills/
+/workspace/
+/skills/
 !tyqa/skills/
 !tyqa/skills/**
-memory/
+/memory/
 !tyqa/memory/
 media/
 conversation_history/
