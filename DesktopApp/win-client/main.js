@@ -118,6 +118,9 @@ function startBackend() {
     }
 
     let backendErrorLog = '';
+    let isDead = false;
+    let portReady = false;
+
     backendProcess = spawn(pythonExe, args, {
       cwd: backendDir,
       env: env,
@@ -135,8 +138,6 @@ function startBackend() {
       console.error(`Backend stderr: ${str}`);
     });
 
-    let isDead = false;
-    let portReady = false;
     backendProcess.on('exit', (code) => {
       isDead = true;
       if (!portReady) {
