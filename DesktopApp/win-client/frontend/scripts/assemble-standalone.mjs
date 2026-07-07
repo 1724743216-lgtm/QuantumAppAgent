@@ -7,7 +7,7 @@
 import { cp, rm, readdir } from "fs/promises";
 import { existsSync } from "fs";
 
-const STANDALONE = ".next/standalone";
+const STANDALONE = ".next/standalone/frontend";
 const STATIC = ".next/static";
 const PUBLIC = "public";
 const OUT = "dist";

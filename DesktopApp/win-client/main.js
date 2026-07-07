@@ -73,7 +73,7 @@ function startServer() {
   return new Promise((resolve, reject) => {
     const frontendDir = app.isPackaged 
       ? path.join(process.resourcesPath, 'frontend') 
-      : path.join(__dirname, 'frontend');
+      : path.join(__dirname, 'frontend', 'dist');
       
     const serverPath = path.join(frontendDir, 'server.js');
     console.log('Starting frontend server at:', serverPath);
