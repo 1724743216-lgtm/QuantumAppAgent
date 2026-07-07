@@ -1,0 +1,35 @@
+{
+  "task": "短时降雨量预测",
+  "data": "synthetic_rainfall (5000/1000/1000 split, seed=42)",
+  "primary_metric": "RMSE",
+  "higher_is_better": false,
+  "value": 0.1753,
+  "auxiliary_metrics": {
+    "MAE": 0.1213,
+    "MAPE": 79.24
+  },
+  "command": "python train_baseline.py",
+  "artifact_paths": [
+    "artifacts/classical_lstm.pth"
+  ],
+  "seed": 42,
+  "backend": "PyTorch LSTM",
+  "model_config": {
+    "hidden_size": 64,
+    "num_layers": 2,
+    "seq_len": 10,
+    "pred_len": 10,
+    "features": 7
+  },
+  "training_config": {
+    "epochs": 50,
+    "batch_size": 64,
+    "lr": 0.001,
+    "best_epoch": 40,
+    "best_val_loss": 0.004576,
+    "train_time_s": 13.7
+  },
+  "limitations": [
+    "使用合成数据，需真实数据验证"
+  ]
+}

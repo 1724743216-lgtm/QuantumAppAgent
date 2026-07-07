@@ -1,0 +1,20 @@
+{
+  "name": "tsp-quantum-app",
+  "version": "1.0.0",
+  "description": "Traveling Salesman Problem Quantum Algorithm Application",
+  "dependencies": {
+    "cqlib": "latest",
+    "numpy": "^1.24.0",
+    "flask": "^2.3.0",
+    "flask-cors": "^4.0.0",
+    "networkx": "^3.0.0"
+  },
+  "dev_dependencies": {
+    "pytest": "^7.0.0",
+    "black": "^23.0.0"
+  },
+  "scripts": {
+    "start": "python app.py",
+    "test": "pytest tests/"
+  }
+}

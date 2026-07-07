@@ -54,10 +54,16 @@ jobs:
       - name: Setup Python
         run: uv python install 3.12
 
+      - name: Setup Portable Python
+        shell: bash
+        run: |
+          curl -LO https://github.com/indygreg/python-build-standalone/releases/download/20240415/cpython-3.12.3+20240415-x86_64-pc-windows-msvc-shared-install_only.tar.gz
+          tar -xf cpython-*.tar.gz
+          mv python backend_python
+
       - name: Install Python Backend Dependencies
         run: |
-          uv venv
-          uv sync
+          uv pip install --system --python backend_python/python.exe .
 
       - name: Install Electron Dependencies
         working-directory: DesktopApp/win-client

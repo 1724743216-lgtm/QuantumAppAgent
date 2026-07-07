@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSP应用测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .btn { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .result { margin-top: 10px; padding: 10px; background-color: #f8f9fa; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TSP量子算法应用测试</h1>
+        
+        <div class="test-section">
+            <h2>API连接测试</h2>
+            <button class="btn btn-primary" onclick="testAPI()">测试API连接</button>
+            <div id="api-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>主应用访问</h2>
+            <p>请尝试访问以下地址：</p>
+            <ul>
+                <li><a href="http://127.0.0.1:5001" target="_blank">http://127.0.0.1:5001</a></li>
+                <li><a href="http://localhost:5001" target="_blank">http://localhost:5001</a></li>
+            </ul>
+            <div id="app-result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        function testAPI() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.innerHTML = '正在测试API连接...';
+            
+            fetch('http://127.0.0.1:5001/health')
+                .then(response => response.json())
+                .then(data => {
+                    resultDiv.innerHTML = `
+                        <h3>API连接成功！</h3>
+                        <p>状态: ${data.status}</p>
+                        <p>消息: ${data.message}</p>
+                        <p>时间: ${new Date().toLocaleString()}</p>
+                    `;
+                })
+                .catch(error => {
+                    resultDiv.innerHTML = `
+                        <h3>API连接失败</h3>
+                        <p>错误: ${error.message}</p>
+                    `;
+                });
+        }
+        
+        // 页面加载时自动测试API
+        window.onload = function() {
+            testAPI();
+        };
+    </script>
+</body>
+</html>

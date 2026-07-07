@@ -18,17 +18,30 @@ function startBackend() {
     
     // Windows paths for the virtual environment
     const pythonExe = app.isPackaged
-      ? path.join(backendDir, '.venv', 'Scripts', 'python.exe')
+      ? path.join(backendDir, 'backend_python', 'python.exe')
       : 'uv'; // In dev (macOS/Linux), use uv
+
+    const backendScriptsDir = app.isPackaged 
+      ? path.join(backendDir, 'backend_python', 'Scripts')
+      : '';
+    const backendPythonDir = app.isPackaged 
+      ? path.join(backendDir, 'backend_python')
+      : '';
 
     const args = app.isPackaged
       ? ['-m', 'tyqa.cli', 'deploy', '--port', BACKEND_PORT.toString()]
       : ['run', 'tyqa', 'deploy', '--port', BACKEND_PORT.toString()];
 
     console.log('Starting Python backend:', pythonExe, args.join(' '));
-    
+
+    const env = { ...process.env };
+    if (app.isPackaged) {
+      env.PATH = `${backendScriptsDir};${backendPythonDir};${env.PATH || ''}`;
+    }
+
     backendProcess = spawn(pythonExe, args, {
       cwd: backendDir,
+      env: env,
       stdio: 'pipe',
       windowsHide: true // Hide terminal window on Windows
     });

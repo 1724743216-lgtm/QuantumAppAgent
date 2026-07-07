@@ -7,6 +7,7 @@
     "build:win": "electron-builder --win --x64"
   },
   "build": {
+    "compression": "normal",
     "appId": "com.tianyan.quantum.ai",
     "productName": "Tianyan Quantum AI",
     "directories": {
@@ -33,7 +34,6 @@
           "!.vscode${/*}",
           "!dist${/*}",
           "!__pycache__${/*}",
-          "!.venv${/*}",
           "!.pytest_cache${/*}"
         ]
       }

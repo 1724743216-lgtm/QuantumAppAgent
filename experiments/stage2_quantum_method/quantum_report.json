@@ -1,0 +1,38 @@
+{
+  "task": "金融欺诈检测二分类",
+  "data": "合成信用卡欺诈检测数据集 (1000 samples, 28 features, PCA→4)",
+  "primary_metric": "f1_score",
+  "higher_is_better": true,
+  "value": 0.2476,
+  "secondary_metrics": {
+    "auc_roc": 0.5723,
+    "precision": 0.2,
+    "recall": 0.325,
+    "accuracy": 0.605
+  },
+  "method": "VQC (Variational Quantum Classifier)",
+  "encoding": "angle_encoding (RY+RZ per qubit)",
+  "n_qubits": 4,
+  "ansatz_layers": 2,
+  "n_parameters": 16,
+  "output": "z_expectation (qubit 0) → sigmoid",
+  "optimizer": "Adam (lr=0.01)",
+  "epochs": 30,
+  "batch_size": 32,
+  "preprocessing": "StandardScaler + PCA(n_components=4) + tanh*π angle encoding",
+  "command": "python3 stage2_quantum.py",
+  "artifact_paths": [
+    "/experiments/stage2_quantum_method/quantum_report.json"
+  ],
+  "seed": 42,
+  "backend": "StatevectorSimulator (local)",
+  "shots": "statevector (no sampling)",
+  "circuit_depth": "2 layers",
+  "limitations": [
+    "合成数据集，非真实交易数据",
+    "PCA降维可能丢失部分信息",
+    "有限差分梯度近似，非精确参数移位",
+    "仅使用1个量子比特的Z期望作为输出",
+    "模拟器结果，非真实硬件"
+  ]
+}

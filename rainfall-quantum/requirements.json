@@ -1,0 +1,31 @@
+{
+  "task": "短时降雨量预测（nowcasting）",
+  "task_type": "regression",
+  "description": "使用量子+经典混合方案预测未来1小时逐6分钟降雨量（10个时间步）",
+  "input": {
+    "features": ["radar_reflectivity", "temperature", "humidity", "wind_speed", "pressure", "wind_direction", "precipitation_history"],
+    "sequence_length": 10,
+    "time_step": "6min"
+  },
+  "output": {
+    "target": "precipitation",
+    "horizon": "1h",
+    "steps": 10,
+    "step_interval": "6min"
+  },
+  "primary_metric": "RMSE",
+  "higher_is_better": false,
+  "auxiliary_metrics": ["MAE", "MAPE"],
+  "data_source": "公开气象数据集（CIKM 2017 / Kaggle Rainfall）",
+  "baseline": "经典LSTM",
+  "quantum_method": "VQC量子特征提取 + LSTM混合模型",
+  "backend": "cqlib StatevectorSimulator（模拟器）",
+  "application_form": "FastAPI后端 + 前端展示（Web应用）",
+  "require_quantum_improvement": false,
+  "require_packaging": true,
+  "constraints": [
+    "使用cqlib SDK构建VQC量子层",
+    "优先模拟器验证",
+    "n_qubits <= 10 for PoC"
+  ]
+}

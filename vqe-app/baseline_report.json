@@ -1,0 +1,15 @@
+{
+  "task": "H2 ground-state energy estimation",
+  "data": "H2 Hamiltonian (R=0.735 Å, minimal basis, 2 qubits)",
+  "primary_metric": "energy (Hartree)",
+  "higher_is_better": false,
+  "value": -1.8572750302023797,
+  "method": "exact_diagonalization",
+  "command": "python vqe_solver.py",
+  "artifact_paths": ["baseline_report.json"],
+  "backend": "numpy.linalg.eigvalsh",
+  "qubits": 2,
+  "limitations": [
+    "Analytical result for fixed Hamiltonian; no variational approximation"
+  ]
+}

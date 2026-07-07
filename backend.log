@@ -1,0 +1,22 @@
+Downloading virtualenv (4.3MiB)
+Downloading ruff (10.1MiB)
+ Downloaded virtualenv
+ Downloaded ruff
+Uninstalled 6 packages in 42ms
+Installed 6 packages in 5ms
+╭──────────────────────────────── TYQA Deploy ─────────────────────────────────╮
+│ Workspace: ~/Documents/QuantumApp/QuantumAppAgent                            │
+│ Port:      6174                                                              │
+│ Auth:      API key                                                           │
+╰──────────────────────────────────────────────────────────────────────────────╯
+✓ langgraph dev ready
+╭────────────────────────────────── ✓ Ready ───────────────────────────────────╮
+│ Endpoint:     http://localhost:6174                                          │
+│ Assistant ID: TYQA                                                           │
+│ Connect via:  any LangChain SDK / LangGraph-compatible UI                    │
+│ Logs:                                                                        │
+│ ~/Documents/QuantumApp/QuantumAppAgent/.config/evoscientist/langgraph_dev.lo │
+│ g                                                                            │
+│                                                                              │
+│ Press Ctrl+C to stop.                                                        │
+╰──────────────────────────────────────────────────────────────────────────────╯

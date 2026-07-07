@@ -1,0 +1,198 @@
+{
+  "delivery_profile": "local_fastapi_demo",
+  "algorithm": {
+    "name": "VQC Quantum Feature Extraction + LSTM Hybrid",
+    "encoding": "angle encoding (Ry + Rz gates per qubit)",
+    "ansatz": "variational layers (Ry+Rz per qubit + CX linear entanglement)",
+    "measurement": "Z expectation value per qubit",
+    "qubits": 6,
+    "circuit_depth": 6,
+    "quantum_layers": 2,
+    "quantum_params": 30,
+    "backend": "cqlib StatevectorSimulator"
+  },
+  "artifacts": {
+    "application_manifest.json": "application_manifest.json",
+    "requirements.json": "requirements.json",
+    "solution_plan.md": "solution_plan.md",
+    "baseline_report.json": "experiments/stage1_scope_baseline/baseline_report.json",
+    "quantum_report.json": "experiments/stage2_quantum_method/quantum_report.json",
+    "verification_report.md": "experiments/stage4_verification_handoff/verification_report.md",
+    "README.md": "README.md",
+    "INTEGRATE.md": "INTEGRATE.md"
+  },
+  "local_demo": {
+    "backend_entrypoint": "backend/app.py",
+    "entrypoint": "frontend/index.html",
+    "start_command": "python backend/start.py",
+    "app_symbol": "app",
+    "endpoints": [
+      {
+        "path": "/health",
+        "method": "GET",
+        "description": "Health check endpoint",
+        "request_schema": {"type": "none"},
+        "response_schema": {
+          "status": "string",
+          "service": "string"
+        },
+        "errors": [
+          {"status": 200, "detail": "ok"}
+        ]
+      },
+      {
+        "path": "/api/info",
+        "method": "GET",
+        "description": "Application info, model config, and feature descriptions",
+        "request_schema": {"type": "none"},
+        "response_schema": {
+          "name": "string",
+          "models": "array",
+          "metrics_description": "object"
+        },
+        "errors": [
+          {"status": 200, "detail": "ok"}
+        ]
+      },
+      {
+        "path": "/api/predict",
+        "method": "POST",
+        "description": "Run prediction using classical or hybrid model",
+        "request_schema": {
+          "model_type": "string (classical|hybrid)",
+          "input_data": "array|null",
+          "use_sample": "boolean"
+        },
+        "response_schema": {
+          "predictions": "array",
+          "model_type": "string"
+        },
+        "sample_request": {
+          "model_type": "classical",
+          "use_sample": true
+        },
+        "errors": [
+          {"status": 400, "detail": "Unsupported model_type"},
+          {"status": 500, "detail": "Test dataset not loaded"}
+        ]
+      },
+      {
+        "path": "/api/metrics",
+        "method": "GET",
+        "description": "Evaluation metrics for both models on test set",
+        "request_schema": {"type": "none"},
+        "response_schema": {
+          "classical": "object",
+          "hybrid": "object",
+          "unit": "object"
+        },
+        "errors": [
+          {"status": 200, "detail": "ok"}
+        ]
+      },
+      {
+        "path": "/api/sample-data",
+        "method": "GET",
+        "description": "Get test set samples with both model predictions",
+        "request_schema": {"type": "none"},
+        "response_schema": {
+          "samples": "array"
+        },
+        "errors": [
+          {"status": 200, "detail": "ok"}
+        ]
+      },
+      {
+        "path": "/api/train-curves",
+        "method": "GET",
+        "description": "Get training/validation loss curve data",
+        "request_schema": {"type": "none"},
+        "response_schema": {
+          "classical": "object",
+          "hybrid": "object"
+        },
+        "errors": [
+          {"status": 200, "detail": "ok"}
+        ]
+      },
+      {
+        "path": "/api/train",
+        "method": "POST",
+        "description": "Trigger model training (synchronous)",
+        "request_schema": {
+          "model_type": "string (classical|hybrid)",
+          "epochs": "integer"
+        },
+        "response_schema": {
+          "status": "string",
+          "model_type": "string",
+          "epochs": "integer",
+          "metrics": "object"
+        },
+        "sample_request": {
+          "model_type": "classical",
+          "epochs": 5
+        },
+        "errors": [
+          {"status": 400, "detail": "Unsupported model_type"},
+          {"status": 500, "detail": "Training failed"}
+        ]
+      }
+    ],
+    "static_assets": [
+      {
+        "url": "/static/index.html",
+        "path": "frontend/index.html",
+        "description": "Vue3 + ECharts frontend page"
+      },
+      {
+        "url": "/static/static/vue.global.prod.js",
+        "path": "frontend/static/vue.global.prod.js",
+        "description": "Vue 3 production build"
+      },
+      {
+        "url": "/static/static/element-plus.css",
+        "path": "frontend/static/element-plus.css",
+        "description": "Element Plus CSS"
+      },
+      {
+        "url": "/static/static/element-plus.js",
+        "path": "frontend/static/element-plus.js",
+        "description": "Element Plus JS"
+      },
+      {
+        "url": "/static/static/element-plus-icons.js",
+        "path": "frontend/static/element-plus-icons.js",
+        "description": "Element Plus Icons JS"
+      },
+      {
+        "url": "/static/static/echarts.min.js",
+        "path": "frontend/static/echarts.min.js",
+        "description": "ECharts 5"
+      }
+    ]
+  },
+  "verification": {
+    "commands": [
+      "python backend/start.py",
+      "curl http://localhost:8000/health",
+      "curl http://localhost:8000/api/info",
+      "curl -X POST http://localhost:8000/api/predict -H 'Content-Type: application/json' -d '{\"model_type\": \"classical\", \"use_sample\": true}'"
+    ]
+  },
+  "docs": {
+    "README.md": "README.md",
+    "INTEGRATE.md": "INTEGRATE.md",
+    "verification_report.md": "experiments/stage4_verification_handoff/verification_report.md",
+    "solution_plan.md": "solution_plan.md"
+  },
+  "limitations": [
+    "Quantum model RMSE (+0.0013mm) does not beat the classical baseline; this is an honest negative result",
+    "Quantum layer gradient is detached (no parameter-shift rule), limiting quantum parameter optimization",
+    "All results are from cqlib StatevectorSimulator, not real quantum hardware",
+    "Synthetic data only; not validated on real meteorological observations (e.g., CIKM 2017, SEVIR)",
+    "n_qubits=6 limited by simulator computational cost",
+    "Single-machine deployment; no distributed inference or load balancing",
+    "Synchronous training endpoint may block HTTP requests"
+  ]
+}

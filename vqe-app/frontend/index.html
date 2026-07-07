@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VQE H2 分子基态能量</title>
+  <script src="/static/echarts.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1923;
+      --card: #1a2736;
+      --accent: #00d4ff;
+      --accent2: #7b61ff;
+      --text: #e0e6ed;
+      --muted: #8899aa;
+      --border: #2a3a4a;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .header {
+      text-align: center;
+      padding: 40px 20px 20px;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header p { color: var(--muted); margin-top: 8px; font-size: 14px; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 20px 40px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+    .card .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    .card .value { font-size: 32px; font-weight: 700; margin: 8px 0 4px; }
+    .card .sub { font-size: 13px; color: var(--muted); }
+    .accent .value { color: var(--accent); }
+    .accent2 .value { color: var(--accent2); }
+    .success .value { color: #00e676; }
+    .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .chart-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .chart-card h3 { font-size: 14px; color: var(--muted); margin-bottom: 12px; font-weight: 500; }
+    .chart-container { width: 100%; height: 320px; }
+    .controls {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .controls label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px; }
+    .controls input, .controls select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 8px 12px;
+      font-size: 14px;
+      width: 120px;
+    }
+    .controls button {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .controls button:hover { opacity: 0.85; }
+    .controls button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .loading { text-align: center; padding: 40px; color: var(--muted); }
+    @media (max-width: 768px) {
+      .chart-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>VQE H2 分子基态能量求解</h1>
+    <p>基于 cqlib SDK 的变分量子本征求解器 &mdash; H2 分子 (R=0.735 Å, 2 qubits)</p>
+  </div>
+
+  <div class="container">
+    <div class="cards" id="metricCards">
+      <div class="card accent2">
+        <div class="label">精确对角化</div>
+        <div class="value" id="exactValue">--</div>
+        <div class="sub">Hartree</div>
+      </div>
+      <div class="card accent">
+        <div class="label">VQE 优化结果</div>
+        <div class="value" id="vqeValue">--</div>
+        <div class="sub">Hartree</div>
+      </div>
+      <div class="card success">
+        <div class="label">绝对误差</div>
+        <div class="value" id="errorValue">--</div>
+        <div class="sub">Hartree</div>
+      </div>
+      <div class="card">
+        <div class="label">优化迭代次数</div>
+        <div class="value" id="iterValue">--</div>
+        <div class="sub">COBYLA</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div>
+        <label>Ansatz 层数</label>
+        <input type="number" id="layersInput" value="2" min="1" max="6" />
+      </div>
+      <div>
+        <label>最大迭代</label>
+        <input type="number" id="maxIterInput" value="200" min="50" max="1000" step="50" />
+      </div>
+      <div>
+        <label>随机种子</label>
+        <input type="number" id="seedInput" value="42" />
+      </div>
+      <button id="runBtn" onclick="runVQE()">运行 VQE</button>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card">
+        <h3>收敛曲线</h3>
+        <div class="chart-container" id="convergenceChart"></div>
+      </div>
+      <div class="chart-card">
+        <h3>哈密顿量项系数</h3>
+        <div class="chart-container" id="hamiltonianChart"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let convChart = null;
+    let hamChart = null;
+
+    function initCharts() {
+      convChart = echarts.init(document.getElementById('convergenceChart'));
+      hamChart = echarts.init(document.getElementById('hamiltonianChart'));
+      window.addEventListener('resize', () => {
+        convChart && convChart.resize();
+        hamChart && hamChart.resize();
+      });
+    }
+
+    function fmt(v, d) { return typeof v === 'number' ? v.toFixed(d || 4) : '--'; }
+
+    function updateMetrics(data) {
+      document.getElementById('exactValue').textContent = fmt(data.exact_energy);
+      document.getElementById('vqeValue').textContent = fmt(data.vqe_energy);
+      document.getElementById('errorValue').textContent = fmt(data.error, 6);
+      document.getElementById('iterValue').textContent = data.iterations || '--';
+    }
+
+    function renderConvergence(trace, exact) {
+      const xData = trace.map((_, i) => i + 1);
+      convChart.setOption({
+        backgroundColor: 'transparent',
+        tooltip: { trigger: 'axis' },
+        grid: { left: 60, right: 20, top: 20, bottom: 40 },
+        xAxis: { type: 'category', data: xData, name: '迭代', axisLine: { lineStyle: { color: '#2a3a4a' } }, axisLabel: { color: '#8899aa' } },
+        yAxis: { type: 'value', name: '能量 (Hartree)', axisLine: { lineStyle: { color: '#2a3a4a' } }, axisLabel: { color: '#8899aa' }, splitLine: { lineStyle: { color: '#1a2736' } } },
+        series: [
+          { name: 'VQE能量', type: 'line', data: trace, smooth: true, lineStyle: { color: '#00d4ff', width: 2 }, itemStyle: { color: '#00d4ff' }, symbol: 'none' },
+          { name: '精确值', type: 'line', data: trace.map(() => exact), lineStyle: { color: '#7b61ff', type: 'dashed', width: 1.5 }, itemStyle: { color: '#7b61ff' }, symbol: 'none' }
+        ]
+      });
+    }
+
+    function renderHamiltonian(terms) {
+      const labels = terms.map(t => t.term);
+      const values = terms.map(t => t.coefficient);
+      const colors = values.map(v => v >= 0 ? '#00d4ff' : '#ff6b6b');
+      hamChart.setOption({
+        backgroundColor: 'transparent',
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        grid: { left: 80, right: 20, top: 20, bottom: 40 },
+        xAxis: { type: 'value', name: '系数', axisLine: { lineStyle: { color: '#2a3a4a' } }, axisLabel: { color: '#8899aa' }, splitLine: { lineStyle: { color: '#1a2736' } } },
+        yAxis: { type: 'category', data: labels, axisLine: { lineStyle: { color: '#2a3a4a' } }, axisLabel: { color: '#8899aa' } },
+        series: [{ type: 'bar', data: values.map((v, i) => ({ value: v, itemStyle: { color: colors[i] } })) }]
+      });
+    }
+
+    async function loadInitial() {
+      try {
+        const resp = await fetch('/api/results');
+        const data = await resp.json();
+        if (data.baseline && data.quantum) {
+          updateMetrics({
+            exact_energy: data.baseline.value,
+            vqe_energy: data.quantum.value,
+            error: Math.abs(data.quantum.value - data.baseline.value),
+            iterations: data.quantum.iterations,
+          });
+          if (data.quantum.convergence_trace) {
+            renderConvergence(data.quantum.convergence_trace, data.baseline.value);
+          }
+        }
+        const hResp = await fetch('/api/hamiltonian');
+        const hData = await hResp.json();
+        if (hData.hamiltonian) renderHamiltonian(hData.hamiltonian);
+      } catch (e) {
+        console.error('Failed to load initial data:', e);
+      }
+    }
+
+    async function runVQE() {
+      const btn = document.getElementById('runBtn');
+      btn.disabled = true;
+      btn.textContent = '运行中...';
+      const layers = parseInt(document.getElementById('layersInput').value);
+      const maxIter = parseInt(document.getElementById('maxIterInput').value);
+      const seed = parseInt(document.getElementById('seedInput').value);
+      try {
+        const resp = await fetch(`/api/run?layers=${layers}&max_iter=${maxIter}&seed=${seed}`);
+        const data = await resp.json();
+        if (data.status === 'ok') {
+          updateMetrics(data);
+          renderConvergence(data.convergence_trace, data.exact_energy);
+        } else {
+          alert('运行失败: ' + (data.message || '未知错误'));
+        }
+      } catch (e) {
+        alert('请求失败: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '运行 VQE';
+      }
+    }
+
+    initCharts();
+    loadInitial();
+  </script>
+</body>
+</html>

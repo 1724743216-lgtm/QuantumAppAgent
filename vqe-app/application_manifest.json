@@ -1,0 +1,107 @@
+{
+  "application_name": "VQE H2 分子基态能量求解",
+  "delivery_profile": "local_fastapi_demo",
+  "algorithm": "VQE",
+  "algorithm_detail": "Variational Quantum Eigensolver with hardware-efficient ansatz for H2 molecule ground-state energy",
+  "description": "使用 cqlib SDK 的 VQE 算法求解 H2 分子基态能量，对比经典精确对角化基线",
+  "artifacts": {
+    "requirements.json": "requirements.json",
+    "baseline_report.json": "baseline_report.json",
+    "quantum_report.json": "quantum_report.json",
+    "verification_report.md": "verification_report.md"
+  },
+  "baseline_report": "baseline_report.json",
+  "quantum_report": "quantum_report.json",
+  "local_demo": {
+    "entrypoint": "frontend/index.html",
+    "backend_entrypoint": "backend/app.py",
+    "backend": "backend/app.py",
+    "start_command": "python backend/app.py",
+    "static_assets": [
+      {
+        "url": "/static/index.html",
+        "path": "frontend/index.html",
+        "description": "VQE H2 frontend page"
+      },
+      {
+        "url": "/static/echarts.min.js",
+        "path": "frontend/echarts.min.js",
+        "description": "ECharts 5"
+      }
+    ],
+    "endpoints": [
+      {
+        "path": "/api/results",
+        "method": "GET",
+        "description": "获取预计算的基线和VQE结果",
+        "request_schema": {"type": "none"},
+        "response_schema": {
+          "type": "object",
+          "properties": {
+            "baseline": {"type": "object"},
+            "quantum": {"type": "object"}
+          }
+        },
+        "errors": [{"status": 500, "description": "Server error"}]
+      },
+      {
+        "path": "/api/run",
+        "method": "GET",
+        "description": "运行新的VQE优化",
+        "request_schema": {
+          "type": "object",
+          "properties": {
+            "layers": {"type": "integer", "default": 2},
+            "max_iter": {"type": "integer", "default": 200},
+            "seed": {"type": "integer", "default": 42}
+          }
+        },
+        "response_schema": {
+          "type": "object",
+          "properties": {
+            "status": {"type": "string"},
+            "vqe_energy": {"type": "number"},
+            "exact_energy": {"type": "number"},
+            "error": {"type": "number"},
+            "iterations": {"type": "integer"},
+            "convergence_trace": {"type": "array", "items": {"type": "number"}}
+          }
+        },
+        "errors": [{"status": 500, "description": "VQE optimization failed"}]
+      },
+      {
+        "path": "/api/hamiltonian",
+        "method": "GET",
+        "description": "获取H2哈密顿量项",
+        "request_schema": {"type": "none"},
+        "response_schema": {
+          "type": "object",
+          "properties": {
+            "hamiltonian": {"type": "array"},
+            "n_qubits": {"type": "integer"}
+          }
+        },
+        "errors": [{"status": 500, "description": "Server error"}]
+      }
+    ]
+  },
+  "qccp_web": null,
+  "docs": [
+    "README.md",
+    "INTEGRATE.md"
+  ],
+  "verification": {
+    "commands": ["python vqe_solver.py"],
+    "checks": [
+      "VQE energy within 0.01 Hartree of exact diagonalization",
+      "Convergence trace is non-empty",
+      "Both report files are valid JSON with required fields"
+    ]
+  },
+  "limitations": [
+    "Statevector simulator (no shot noise)",
+    "Small Hamiltonian (2 qubits)",
+    "Fixed bond distance R=0.735 Å",
+    "VQE is approximate and does not beat exact diagonalization baseline"
+  ]
+}

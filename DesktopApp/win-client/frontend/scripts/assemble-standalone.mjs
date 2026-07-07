@@ -1,12 +1,27 @@
 import { cp, rm, readdir } from "fs/promises";
-import { existsSync } from "fs";
+import { existsSync, readdirSync } from "fs";
+import { join, dirname } from "path";
 
 let STANDALONE = ".next/standalone";
-if (!existsSync(`${STANDALONE}/server.js`)) {
-  if (existsSync(`${STANDALONE}/frontend/server.js`)) {
-    STANDALONE = `${STANDALONE}/frontend`;
-  } else if (existsSync(`${STANDALONE}/DesktopApp/win-client/frontend/server.js`)) {
-    STANDALONE = `${STANDALONE}/DesktopApp/win-client/frontend`;
+
+// Auto-discover the directory containing server.js inside .next/standalone
+function findServerJs(dir) {
+  const entries = readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      const res = findServerJs(join(dir, entry.name));
+      if (res) return res;
+    } else if (entry.name === "server.js") {
+      return dir;
+    }
+  }
+  return null;
+}
+
+if (!existsSync(join(STANDALONE, "server.js"))) {
+  const found = findServerJs(STANDALONE);
+  if (found) {
+    STANDALONE = found;
   }
 }
 
@@ -14,18 +29,18 @@ const STATIC = ".next/static";
 const PUBLIC = "public";
 const OUT = "dist";
 
-if (!existsSync(STANDALONE)) {
+if (!existsSync(STANDALONE) || !existsSync(join(STANDALONE, "server.js"))) {
   console.error(
-    `✗ ${STANDALONE} not found. Did "next build" run with output:"standalone"?`
+    `✗ server.js not found in ${STANDALONE}. Did "next build" run with output:"standalone"?`
   );
   process.exit(1);
 }
 
 await rm(OUT, { recursive: true, force: true });
 await cp(STANDALONE, OUT, { recursive: true });
-await cp(STATIC, `${OUT}/.next/static`, { recursive: true });
+await cp(STATIC, join(OUT, ".next/static"), { recursive: true });
 if (existsSync(PUBLIC)) {
-  await cp(PUBLIC, `${OUT}/public`, { recursive: true });
+  await cp(PUBLIC, join(OUT, "public"), { recursive: true });
 }
 
 const KEEP = new Set([
@@ -37,14 +52,14 @@ const KEEP = new Set([
 ]);
 for (const entry of await readdir(OUT)) {
   if (!KEEP.has(entry)) {
-    await rm(`${OUT}/${entry}`, { recursive: true, force: true });
+    await rm(join(OUT, entry), { recursive: true, force: true });
   }
 }
 
 let strippedMaps = 0;
 for (const entry of await readdir(OUT, { recursive: true })) {
   if (entry.endsWith(".map")) {
-    await rm(`${OUT}/${entry}`, { force: true });
+    await rm(join(OUT, entry), { force: true });
     strippedMaps++;
   }
 }

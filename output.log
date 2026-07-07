@@ -1,0 +1,105 @@
+ * Serving Flask app 'app'
+ * Debug mode: on
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.100:5001
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 146-322-134
+127.0.0.1 - - [29/Jun/2026 15:36:23] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [29/Jun/2026 15:36:28] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [29/Jun/2026 15:36:32] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [29/Jun/2026 15:36:44] "POST /api/cities HTTP/1.1" 200 -
+127.0.0.1 - - [29/Jun/2026 15:36:46] "POST /api/solve HTTP/1.1" 200 -
+127.0.0.1 - - [29/Jun/2026 15:36:48] "POST /api/solve HTTP/1.1" 200 -
+127.0.0.1 - - [29/Jun/2026 15:36:48] "POST /api/classical HTTP/1.1" 200 -
+127.0.0.1 - - [29/Jun/2026 15:36:50] "POST /api/classical HTTP/1.1" 200 -
+127.0.0.1 - - [29/Jun/2026 15:36:52] "POST /api/solve HTTP/1.1" 200 -
+127.0.0.1 - - [29/Jun/2026 15:36:53] "POST /api/solve HTTP/1.1" 200 -
+127.0.0.1 - - [29/Jun/2026 15:36:53] "POST /api/classical HTTP/1.1" 200 -
+127.0.0.1 - - [29/Jun/2026 15:37:40] "[36mGET / HTTP/1.1[0m" 304 -
+127.0.0.1 - - [29/Jun/2026 15:37:48] "POST /api/cities HTTP/1.1" 200 -
+127.0.0.1 - - [29/Jun/2026 15:38:11] "POST /api/solve HTTP/1.1" 200 -
+127.0.0.1 - - [29/Jun/2026 15:39:55] "POST /api/cities HTTP/1.1" 200 -
+127.0.0.1 - - [29/Jun/2026 15:39:57] "POST /api/solve HTTP/1.1" 200 -
+127.0.0.1 - - [29/Jun/2026 15:40:02] "POST /api/classical HTTP/1.1" 200 -
+127.0.0.1 - - [29/Jun/2026 15:40:02] "POST /api/solve HTTP/1.1" 200 -
+127.0.0.1 - - [29/Jun/2026 15:40:04] "POST /api/solve HTTP/1.1" 200 -
+127.0.0.1 - - [29/Jun/2026 15:40:06] "POST /api/solve HTTP/1.1" 200 -
+127.0.0.1 - - [29/Jun/2026 15:40:06] "POST /api/classical HTTP/1.1" 200 -
+ * Detected change in '/Users/FTT/Documents/QuantumApp/QuantumAppAgent/.venv/lib/python3.13/site-packages/_distutils_hack/__init__.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 146-322-134
+ * Detected change in '/Users/FTT/Documents/QuantumApp/QuantumAppAgent/experiments/stage1_scope_baseline/stage1_baseline.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 146-322-134
+ * Detected change in '/Users/FTT/Documents/QuantumApp/QuantumAppAgent/experiments/stage1_scope_baseline/stage1_baseline.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 146-322-134
+ * Detected change in '/Users/FTT/Documents/QuantumApp/QuantumAppAgent/experiments/stage2_quantum_method/stage2_quantum.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 146-322-134
+ * Detected change in '/Users/FTT/Documents/QuantumApp/QuantumAppAgent/experiments/stage2_quantum_method/stage2_quantum.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 146-322-134
+ * Detected change in '/Users/FTT/Documents/QuantumApp/QuantumAppAgent/rainfall-quantum/models/quantum_layer.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 146-322-134
+ * Detected change in '/Users/FTT/Documents/QuantumApp/QuantumAppAgent/rainfall-quantum/models/quantum_layer.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 146-322-134
+ * Detected change in '/Users/FTT/Documents/QuantumApp/QuantumAppAgent/rainfall-quantum/models/quantum_layer.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 146-322-134
+ * Detected change in '/Users/FTT/Documents/QuantumApp/QuantumAppAgent/rainfall-quantum/models/hybrid_vqc_lstm.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 146-322-134
+ * Detected change in '/Users/FTT/Documents/QuantumApp/QuantumAppAgent/rainfall-quantum/models/hybrid_vqc_lstm.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 146-322-134
+ * Detected change in '/Users/FTT/Documents/QuantumApp/QuantumAppAgent/rainfall-quantum/train_hybrid.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 146-322-134
+ * Detected change in '/Users/FTT/Documents/QuantumApp/QuantumAppAgent/rainfall-quantum/train_hybrid.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 146-322-134
+ * Detected change in '/Users/FTT/Documents/QuantumApp/QuantumAppAgent/rainfall-quantum/backend/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 146-322-134
+ * Detected change in '/Users/FTT/Documents/QuantumApp/QuantumAppAgent/rainfall-quantum/backend/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 146-322-134
+ * Detected change in '/Users/FTT/Documents/QuantumApp/QuantumAppAgent/EvoScientist/langgraph_dev/manager.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 146-322-134
+ * Detected change in '/Users/FTT/Documents/QuantumApp/QuantumAppAgent/tests/test_channel_command_ui.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 146-322-134
+ * Detected change in '/Users/FTT/Documents/QuantumApp/QuantumAppAgent/tyqa/langgraph_dev/manager.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 146-322-134
+ * Detected change in '/Users/FTT/Documents/QuantumApp/QuantumAppAgent/rainfall-quantum/backend/app.py', reloading
+ * Restarting with stat
+Traceback (most recent call last):
+  File "/Users/FTT/Documents/QuantumApp/QuantumAppAgent/app.py", line 1, in <module>
+    from flask import Flask, request, jsonify, send_from_directory
+ModuleNotFoundError: No module named 'flask'

@@ -1,0 +1,15 @@
+{
+  "task": "H2 ground-state energy estimation",
+  "primary_metric": "energy (Hartree)",
+  "higher_is_better": false,
+  "baseline_method": "exact_diagonalization",
+  "quantum_method": "VQE",
+  "quantum_beats_baseline": false,
+  "tolerance": 0.01,
+  "required_packages": ["cqlib", "scipy", "numpy", "fastapi", "uvicorn"],
+  "hardware_requirements": {
+    "qubits": 2,
+    "circuit_type": "parameterized",
+    "backend": "StatevectorSimulator"
+  }
+}

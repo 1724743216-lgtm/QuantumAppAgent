@@ -1,0 +1,26 @@
+{
+  "task": "金融欺诈检测二分类",
+  "data": "合成信用卡欺诈检测数据集 (1000 samples, 28 features, PCA→4)",
+  "primary_metric": "f1_score",
+  "higher_is_better": true,
+  "value": 0.4211,
+  "secondary_metrics": {
+    "auc_roc": 0.695,
+    "precision": 0.3243,
+    "recall": 0.6,
+    "accuracy": 0.67
+  },
+  "method": "Logistic Regression (class_weight=balanced)",
+  "preprocessing": "StandardScaler + PCA(n_components=4)",
+  "command": "python3 stage1_baseline.py",
+  "artifact_paths": [
+    "/experiments/stage1_scope_baseline/baseline_report.json"
+  ],
+  "seed": 42,
+  "backend": "classical",
+  "limitations": [
+    "合成数据集，非真实交易数据",
+    "PCA降维可能丢失部分信息",
+    "仅使用Logistic Regression作为基线"
+  ]
+}

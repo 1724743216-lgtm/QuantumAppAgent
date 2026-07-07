@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSP量子算法应用</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .section h2 {
+            color: #555;
+            margin-top: 0;
+        }
+        .city-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .city-input input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        .city-input input[type="text"] {
+            flex: 1;
+        }
+        .city-input input[type="number"] {
+            width: 80px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .matrix-display {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .matrix {
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .matrix th, .matrix td {
+            border: 1px solid #ddd;
+            padding: 5px;
+            text-align: center;
+        }
+        .matrix th {
+            background-color: #f2f2f2;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+        .result h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .result-item {
+            margin-bottom: 10px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        .controls label {
+            font-weight: bold;
+        }
+        .controls input {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            width: 60px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>旅行商问题(TSP)量子算法应用</h1>
+        
+        <div class="section">
+            <h2>1. 定义城市</h2>
+            <div id="cityInputs">
+                <div class="city-input">
+                    <input type="text" placeholder="城市名称" value="北京">
+                    <input type="number" placeholder="X坐标" value="0">
+                    <input type="number" placeholder="Y坐标" value="0">
+                    <button class="btn btn-danger" onclick="removeCity(this)">删除</button>
+                </div>
+                <div class="city-input">
+                    <input type="text" placeholder="城市名称" value="上海">
+                    <input type="number" placeholder="X坐标" value="100">
+                    <input type="number" placeholder="Y坐标" value="0">
+                    <button class="btn btn-danger" onclick="removeCity(this)">删除</button>
+                </div>
+                <div class="city-input">
+                    <input type="text" placeholder="城市名称" value="广州">
+                    <input type="number" placeholder="X坐标" value="50">
+                    <input type="number" placeholder="Y坐标" value="100">
+                    <button class="btn btn-danger" onclick="removeCity(this)">删除</button>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="addCity()">添加城市</button>
+                <button class="btn btn-primary" onclick="generateRandomCities()">生成随机城市</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>2. 生成距离矩阵</h2>
+            <button class="btn btn-primary" onclick="generateMatrix()">生成距离矩阵</button>
+            <div id="matrixDisplay" class="matrix-display"></div>
+        </div>
+        
+        <div class="section">
+            <h2>3. 选择算法参数</h2>
+            <div class="controls">
+                <label for="qaoaLayers">QAOA层数:</label>
+                <input type="number" id="qaoaLayers" value="1" min="1" max="3">
+                <label for="shots">量子模拟次数:</label>
+                <input type="number" id="shots" value="1000" min="100" max="10000">
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>4. 求解TSP</h2>
+            <div class="controls">
+                <button class="btn btn-success" onclick="solveQuantum()">量子算法求解</button>
+                <button class="btn btn-secondary" onclick="solveClassical()">经典算法求解</button>
+                <button class="btn btn-primary" onclick="compareMethods()">对比求解</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>5. 结果显示</h2>
+            <div id="results"></div>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>正在计算中...</p>
+        </div>
+    </div>
+
+    <script>
+        let currentMatrix = null;
+        let currentCityNames = [];
+        
+        function addCity() {
+            const cityInputs = document.getElementById('cityInputs');
+            const newCity = document.createElement('div');
+            newCity.className = 'city-input';
+            newCity.innerHTML = `
+                <input type="text" placeholder="城市名称">
+                <input type="number" placeholder="X坐标">
+                <input type="number" placeholder="Y坐标">
+                <button class="btn btn-danger" onclick="removeCity(this)">删除</button>
+            `;
+            cityInputs.appendChild(newCity);
+        }
+        
+        function removeCity(button) {
+            button.parentElement.remove();
+        }
+        
+        function generateRandomCities() {
+            const numCities = Math.floor(Math.random() * 3) + 4; // 4-6 cities
+            const cityInputs = document.getElementById('cityInputs');
+            cityInputs.innerHTML = '';
+            
+            for (let i = 0; i < numCities; i++) {
+                const x = Math.floor(Math.random() * 100);
+                const y = Math.floor(Math.random() * 100);
+                const newCity = document.createElement('div');
+                newCity.className = 'city-input';
+                newCity.innerHTML = `
+                    <input type="text" placeholder="城市名称" value="城市${i+1}">
+                    <input type="number" placeholder="X坐标" value="${x}">
+                    <input type="number" placeholder="Y坐标" value="${y}">
+                    <button class="btn btn-danger" onclick="removeCity(this)">删除</button>
+                `;
+                cityInputs.appendChild(newCity);
+            }
+        }
+        
+        function getCities() {
+            const cityInputs = document.querySelectorAll('.city-input');
+            const cities = [];
+            
+            cityInputs.forEach(input => {
+                const name = input.querySelector('input[type="text"]').value;
+                const x = parseFloat(input.querySelector('input[type="number"]').value);
+                const y = parseFloat(input.querySelectorAll('input[type="number"]')[1].value);
+                
+                if (name && !isNaN(x) && !isNaN(y)) {
+                    cities.push({ name, x, y });
+                }
+            });
+            
+            return cities;
+        }
+        
+        function generateMatrix() {
+            const cities = getCities();
+            
+            if (cities.length < 2) {
+                alert('请至少输入2个城市');
+                return;
+            }
+            
+            const response = fetch('/api/cities', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ cities: cities })
+            })
+            .then(response => response.json())
+            .then(data => {
+                currentMatrix = data.distance_matrix;
+                currentCityNames = data.city_names;
+                displayMatrix(data.distance_matrix, data.city_names);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('生成距离矩阵失败');
+            });
+        }
+        
+        function displayMatrix(matrix, cityNames) {
+            const matrixDisplay = document.getElementById('matrixDisplay');
+            let html = '<h3>距离矩阵</h3><table class="matrix"><tr><th></th>';
+            
+            cityNames.forEach(name => {
+                html += `<th>${name}</th>`;
+            });
+            html += '</tr>';
+            
+            matrix.forEach((row, i) => {
+                html += `<tr><th>${cityNames[i]}</th>`;
+                row.forEach(cell => {
+                    html += `<td>${cell.toFixed(2)}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</table>';
+            matrixDisplay.innerHTML = html;
+        }
+        
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+        
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('results');
+            let html = '<div class="result">';
+            
+            if (results.quantum && results.classical) {
+                html += '<h3>对比结果</h3>';
+                html += `<div class="result-item"><strong>量子算法:</strong> ${results.quantum.method} - 距离: ${results.quantum.distance.toFixed(2)}</div>`;
+                html += `<div class="result-item"><strong>经典算法:</strong> ${results.classical.method} - 距离: ${results.classical.distance.toFixed(2)}</div>`;
+                html += `<div class="result-item"><strong>改进:</strong> ${results.improvement.toFixed(2)} (${results.improvement_percent.toFixed(2)}%)</div>`;
+            } else if (results.method) {
+                html += `<h3>${results.method}算法结果</h3>`;
+                html += `<div class="result-item"><strong>路径:</strong> ${results.path.map(i => currentCityNames[i]).join(' → ')}</div>`;
+                html += `<div class="result-item"><strong>总距离:</strong> ${results.distance.toFixed(2)}</div>`;
+                if (results.error) {
+                    html += `<div class="result-item"><strong>错误:</strong> ${results.error}</div>`;
+                }
+            }
+            
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+        }
+        
+        function solveQuantum() {
+            if (!currentMatrix) {
+                alert('请先生成距离矩阵');
+                return;
+            }
+            
+            showLoading();
+            
+            const p = parseInt(document.getElementById('qaoaLayers').value);
+            
+            fetch('/api/solve', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    distance_matrix: currentMatrix,
+                    num_cities: currentMatrix.length,
+                    p: p
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                displayResults(data);
+            })
+            .catch(error => {
+                hideLoading();
+                console.error('Error:', error);
+                alert('量子算法求解失败');
+            });
+        }
+        
+        function solveClassical() {
+            if (!currentMatrix) {
+                alert('请先生成距离矩阵');
+                return;
+            }
+            
+            showLoading();
+            
+            fetch('/api/classical', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    distance_matrix: currentMatrix,
+                    num_cities: currentMatrix.length
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                displayResults(data);
+            })
+            .catch(error => {
+                hideLoading();
+                console.error('Error:', error);
+                alert('经典算法求解失败');
+            });
+        }
+        
+        function compareMethods() {
+            if (!currentMatrix) {
+                alert('请先生成距离矩阵');
+                return;
+            }
+            
+            showLoading();
+            
+            const p = parseInt(document.getElementById('qaoaLayers').value);
+            
+            // Run both methods and compare
+            Promise.all([
+                fetch('/api/solve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        distance_matrix: currentMatrix,
+                        num_cities: currentMatrix.length,
+                        p: p
+                    })
+                }),
+                fetch('/api/classical', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        distance_matrix: currentMatrix,
+                        num_cities: currentMatrix.length
+                    })
+                })
+            ])
+            .then(([quantumRes, classicalRes]) => Promise.all([quantumRes.json(), classicalRes.json()]))
+            .then(([quantumData, classicalData]) => {
+                hideLoading();
+                displayResults({
+                    quantum: quantumData,
+                    classical: classicalData,
+                    improvement: classicalData.distance - quantumData.distance,
+                    improvement_percent: ((classicalData.distance - quantumData.distance) / classicalData.distance * 100)
+                });
+            })
+            .catch(error => {
+                hideLoading();
+                console.error('Error:', error);
+                alert('对比求解失败');
+            });
+        }
+    </script>
+</body>
+</html>

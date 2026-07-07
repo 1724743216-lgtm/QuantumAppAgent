@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>短时降雨量量子混合预测系统</title>
+  <!-- Vue 3 -->
+  <script src="/static/static/vue.global.prod.js"></script>
+  <!-- Element Plus -->
+  <link rel="stylesheet" href="/static/static/element-plus.css" />
+  <script src="/static/static/element-plus.js"></script>
+  <!-- Element Plus Icons -->
+  <script src="/static/static/element-plus-icons.js"></script>
+  <!-- ECharts 5 -->
+  <script src="/static/static/echarts.min.js"></script>
+  <style>
+    /* ===== CSS Variables - 深色科技风 ===== */
+    :root {
+      --bg-primary: #1a1a2e;
+      --bg-card: #0f3460;
+      --bg-card-light: #16213e;
+      --accent-red: #e94560;
+      --accent-quantum: #16c79a;
+      --accent-classical: #3b82f6;
+      --accent-classical-light: #60a5fa;
+      --accent-hybrid-light: #a78bfa;
+      --text-primary: #e8eaf6;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --border-color: #1e3a5f;
+      --radius: 10px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ===== Layout ===== */
+    .app-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* ===== Section 1: Header ===== */
+    .app-header {
+      text-align: center;
+      padding: 36px 20px 28px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 28px;
+    }
+    .app-header h1 {
+      font-size: 30px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-red), var(--accent-quantum));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+      letter-spacing: 2px;
+    }
+    .app-header .subtitle {
+      color: var(--text-secondary);
+      font-size: 14px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .header-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 12px;
+    }
+    .header-badge.online {
+      background: rgba(22, 199, 154, 0.15);
+      color: var(--accent-quantum);
+      border: 1px solid rgba(22, 199, 154, 0.3);
+    }
+    .header-badge.offline {
+      background: rgba(233, 69, 96, 0.15);
+      color: var(--accent-red);
+      border: 1px solid rgba(233, 69, 96, 0.3);
+    }
+    .header-badge.loading {
+      background: rgba(156, 163, 175, 0.15);
+      color: var(--text-secondary);
+      border: 1px solid rgba(156, 163, 175, 0.3);
+    }
+
+    /* ===== Card ===== */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+      transition: border-color 0.2s;
+    }
+    .card:hover {
+      border-color: rgba(22, 199, 154, 0.3);
+    }
+    .card-title {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-primary);
+    }
+    .card-title .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .card-title .dot.quantum { background: var(--accent-quantum); box-shadow: 0 0 8px rgba(22, 199, 154, 0.5); }
+    .card-title .dot.classical { background: var(--accent-classical); box-shadow: 0 0 8px rgba(59, 130, 246, 0.5); }
+    .card-title .dot.accent { background: var(--accent-red); box-shadow: 0 0 8px rgba(233, 69, 96, 0.5); }
+
+    /* ===== Section 2: Controls ===== */
+    .controls-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .control-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    /* Element Plus dark overrides */
+    .el-select .el-input__wrapper {
+      background: var(--bg-card-light) !important;
+      box-shadow: 0 0 0 1px var(--border-color) inset !important;
+    }
+    .el-select .el-input__inner {
+      color: var(--text-primary) !important;
+    }
+    .el-select .el-input__suffix {
+      color: var(--text-secondary) !important;
+    }
+    .el-button--primary {
+      --el-button-bg-color: var(--accent-quantum) !important;
+      --el-button-border-color: var(--accent-quantum) !important;
+      --el-button-hover-bg-color: #12b088 !important;
+      --el-button-hover-border-color: #12b088 !important;
+    }
+    .el-button--default {
+      --el-button-text-color: var(--text-primary) !important;
+      --el-button-border-color: var(--border-color) !important;
+      --el-button-bg-color: var(--bg-card-light) !important;
+    }
+    .el-button--default:hover {
+      --el-button-border-color: var(--accent-quantum) !important;
+      color: var(--accent-quantum) !important;
+    }
+    .el-popper.is-light {
+      background: var(--bg-card) !important;
+      border-color: var(--border-color) !important;
+    }
+    .el-popper.is-light .el-popper__arrow::before {
+      background: var(--bg-card) !important;
+      border-color: var(--border-color) !important;
+    }
+    .el-select-dropdown {
+      background: var(--bg-card) !important;
+      border-color: var(--border-color) !important;
+    }
+    .el-select-dropdown__item {
+      color: var(--text-primary) !important;
+    }
+    .el-select-dropdown__item.is-hovering {
+      background: var(--bg-card-light) !important;
+    }
+    .el-select-dropdown__item.is-selected {
+      color: var(--accent-quantum) !important;
+    }
+    .el-loading-mask {
+      background: rgba(26, 26, 46, 0.8) !important;
+    }
+    .el-message {
+      background: var(--bg-card) !important;
+      border-color: var(--border-color) !important;
+    }
+
+    /* Predict result */
+    .predict-result {
+      margin-top: 16px;
+      padding: 16px;
+      background: var(--bg-card-light);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent-quantum);
+    }
+    .predict-result .result-header {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--accent-quantum);
+    }
+    .predict-result.classical-style {
+      border-left-color: var(--accent-classical);
+    }
+    .predict-result.classical-style .result-header {
+      color: var(--accent-classical-light);
+    }
+    .predict-result .result-values {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .predict-result .step-val {
+      background: rgba(22, 199, 154, 0.1);
+      border: 1px solid rgba(22, 199, 154, 0.2);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--text-primary);
+      text-align: center;
+    }
+    .predict-result .step-val .step-label {
+      color: var(--text-secondary);
+      font-size: 10px;
+      display: block;
+    }
+    .predict-result.classical-style .step-val {
+      background: rgba(59, 130, 246, 0.1);
+      border-color: rgba(59, 130, 246, 0.2);
+    }
+
+    /* ===== Section 3: Chart ===== */
+    .chart-container {
+      width: 100%;
+      height: 420px;
+    }
+
+    /* ===== Section 4: Metrics ===== */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 768px) {
+      .metrics-grid { grid-template-columns: 1fr; }
+    }
+    .metric-compare-card {
+      background: var(--bg-card-light);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .metric-compare-card:hover {
+      transform: translateY(-2px);
+    }
+    .metric-compare-card.better-hybrid {
+      border-color: rgba(22, 199, 154, 0.4);
+    }
+    .metric-compare-card.better-classical {
+      border-color: rgba(59, 130, 246, 0.4);
+    }
+    .metric-name {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+    .metric-values-row {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 8px;
+    }
+    .metric-val {
+      text-align: center;
+    }
+    .metric-val .val {
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .metric-val .val.classical-color { color: var(--accent-classical-light); }
+    .metric-val .val.quantum-color { color: var(--accent-quantum); }
+    .metric-val .val-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 2px;
+    }
+    .metric-diff {
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      display: inline-block;
+      margin-top: 4px;
+    }
+    .metric-diff.improved {
+      background: rgba(22, 199, 154, 0.15);
+      color: var(--accent-quantum);
+    }
+    .metric-diff.degraded {
+      background: rgba(233, 69, 96, 0.15);
+      color: var(--accent-red);
+    }
+
+    /* ===== Section 5: Model Info ===== */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 768px) {
+      .info-grid { grid-template-columns: 1fr; }
+    }
+    .info-block {
+      background: var(--bg-card-light);
+      border-radius: 8px;
+      padding: 18px;
+    }
+    .info-block h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .info-block h4 .dot-classical { color: var(--accent-classical-light); }
+    .info-block h4 .dot-quantum { color: var(--accent-quantum); }
+    .info-list {
+      list-style: none;
+      padding: 0;
+    }
+    .info-list li {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(30, 58, 95, 0.5);
+      font-size: 13px;
+    }
+    .info-list li:last-child { border-bottom: none; }
+    .info-list .info-key { color: var(--text-secondary); }
+    .info-list .info-val { color: var(--text-primary); font-weight: 500; }
+    .info-list .info-val.highlight-quantum { color: var(--accent-quantum); }
+    .info-list .info-val.highlight-classical { color: var(--accent-classical-light); }
+
+    /* ===== Loading ===== */
+    .loading-spinner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      gap: 10px;
+    }
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid var(--border-color);
+      border-top-color: var(--accent-quantum);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== Error ===== */
+    .error-msg {
+      color: var(--accent-red);
+      font-size: 13px;
+      padding: 10px 14px;
+      background: rgba(233, 69, 96, 0.1);
+      border-radius: 6px;
+      border: 1px solid rgba(233, 69, 96, 0.2);
+    }
+
+    /* ===== Footer ===== */
+    .app-footer {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-muted);
+      font-size: 12px;
+      border-top: 1px solid var(--border-color);
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="app-container">
+
+      <!-- ==================== Section 1: 顶部标题区 ==================== -->
+      <header class="app-header">
+        <h1>短时降雨量量子混合预测系统</h1>
+        <p class="subtitle">
+          基于经典 LSTM 与量子变分量子电路 (VQC) 混合模型，预测未来 1 小时逐 6 分钟降雨量，
+          融合量子特征提取与经典时序编码，提升短临降水预报精度。
+        </p>
+        <span class="header-badge" :class="backendStatus === 'ok' ? 'online' : backendStatus === 'loading' ? 'loading' : 'offline'">
+          {{ backendStatus === 'ok' ? '后端已连接' : backendStatus === 'loading' ? '连接中...' : '后端未连接' }}
+        </span>
+      </header>
+
+      <!-- ==================== Section 2: 模型选择与预测区 ==================== -->
+      <div class="card">
+        <div class="card-title">
+          <span class="dot accent"></span>
+          模型选择与预测
+        </div>
+        <div class="controls-row">
+          <div class="control-group">
+            <span class="control-label">模型类型：</span>
+            <el-select v-model="selectedModel" placeholder="选择模型" style="width: 220px;">
+              <el-option label="经典 LSTM" value="classical"></el-option>
+              <el-option label="量子 VQC+LSTM 混合模型" value="hybrid"></el-option>
+            </el-select>
+          </div>
+          <el-button type="primary" :loading="predicting" @click="runPredict">
+            使用示例数据预测
+          </el-button>
+          <el-button @click="runPredictBoth" :loading="predictingBoth">
+            同时预测（对比）
+          </el-button>
+        </div>
+
+        <!-- 错误提示 -->
+        <div v-if="predictError" class="error-msg" style="margin-top: 16px;">
+          {{ predictError }}
+        </div>
+
+        <!-- 单模型预测结果 -->
+        <div v-if="predictResult" class="predict-result" :class="{ 'classical-style': predictResult.model_type === 'classical' }">
+          <div class="result-header">
+            {{ predictResult.model_type === 'hybrid' ? '量子混合 VQC+LSTM' : '经典 LSTM' }} 预测结果
+          </div>
+          <div class="result-values">
+            <span class="step-val" v-for="(val, i) in predictResult.predictions" :key="i">
+              <span class="step-label">+{{ (i + 1) * 6 }}min</span>
+              {{ val.toFixed(2) }} mm
+            </span>
+          </div>
+        </div>
+
+        <!-- 双模型对比结果 -->
+        <div v-if="compareResult" style="margin-top: 16px; display: flex; gap: 16px; flex-wrap: wrap;">
+          <div class="predict-result classical-style" style="flex: 1; min-width: 280px;">
+            <div class="result-header">
+              经典 LSTM 预测
+            </div>
+            <div class="result-values">
+              <span class="step-val" v-for="(val, i) in compareResult.classical" :key="'c' + i">
+                <span class="step-label">+{{ (i + 1) * 6 }}min</span>
+                {{ val.toFixed(2) }} mm
+              </span>
+            </div>
+          </div>
+          <div class="predict-result" style="flex: 1; min-width: 280px;">
+            <div class="result-header">
+              量子混合 VQC+LSTM 预测
+            </div>
+            <div class="result-values">
+              <span class="step-val" v-for="(val, i) in compareResult.hybrid" :key="'h' + i">
+                <span class="step-label">+{{ (i + 1) * 6 }}min</span>
+                {{ val.toFixed(2) }} mm
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== Section 3: 预测结果可视化区 ==================== -->
+      <div class="card">
+        <div class="card-title">
+          <span class="dot quantum"></span>
+          预测结果可视化
+        </div>
+        <div v-if="chartLoading" class="loading-spinner">
+          <div class="spinner"></div> 加载预测数据中...
+        </div>
+        <div v-else id="predictionChart" class="chart-container"></div>
+      </div>
+
+      <!-- ==================== Section 4: 模型对比指标区 ==================== -->
+      <div class="card">
+        <div class="card-title">
+          <span class="dot classical"></span>
+          模型对比指标
+        </div>
+        <div v-if="metricsLoading" class="loading-spinner">
+          <div class="spinner"></div> 加载指标中...
+        </div>
+        <div v-else-if="metricsError" class="error-msg">{{ metricsError }}</div>
+        <div v-else-if="metrics && metrics.classical && metrics.hybrid" class="metrics-grid">
+          <!-- RMSE -->
+          <div class="metric-compare-card" :class="metrics.hybrid.RMSE < metrics.classical.RMSE ? 'better-hybrid' : 'better-classical'">
+            <div class="metric-name">RMSE (均方根误差)</div>
+            <div class="metric-values-row">
+              <div class="metric-val">
+                <span class="val classical-color">{{ metrics.classical.RMSE }}</span>
+                <span class="val-label">经典 LSTM</span>
+              </div>
+              <div class="metric-val">
+                <span class="val quantum-color">{{ metrics.hybrid.RMSE }}</span>
+                <span class="val-label">量子混合</span>
+              </div>
+            </div>
+            <span class="metric-diff" :class="metrics.hybrid.RMSE < metrics.classical.RMSE ? 'improved' : 'degraded'">
+              {{ metrics.hybrid.RMSE < metrics.classical.RMSE ? '\u25BC' : '\u25B2' }}
+              {{ Math.abs(((metrics.hybrid.RMSE - metrics.classical.RMSE) / metrics.classical.RMSE) * 100).toFixed(1) }}%
+            </span>
+          </div>
+          <!-- MAE -->
+          <div class="metric-compare-card" :class="metrics.hybrid.MAE < metrics.classical.MAE ? 'better-hybrid' : 'better-classical'">
+            <div class="metric-name">MAE (平均绝对误差)</div>
+            <div class="metric-values-row">
+              <div class="metric-val">
+                <span class="val classical-color">{{ metrics.classical.MAE }}</span>
+                <span class="val-label">经典 LSTM</span>
+              </div>
+              <div class="metric-val">
+                <span class="val quantum-color">{{ metrics.hybrid.MAE }}</span>
+                <span class="val-label">量子混合</span>
+              </div>
+            </div>
+            <span class="metric-diff" :class="metrics.hybrid.MAE < metrics.classical.MAE ? 'improved' : 'degraded'">
+              {{ metrics.hybrid.MAE < metrics.classical.MAE ? '\u25BC' : '\u25B2' }}
+              {{ Math.abs(((metrics.hybrid.MAE - metrics.classical.MAE) / metrics.classical.MAE) * 100).toFixed(1) }}%
+            </span>
+          </div>
+          <!-- MAPE -->
+          <div class="metric-compare-card" :class="metrics.hybrid.MAPE < metrics.classical.MAPE ? 'better-hybrid' : 'better-classical'">
+            <div class="metric-name">MAPE (平均绝对百分比误差)</div>
+            <div class="metric-values-row">
+              <div class="metric-val">
+                <span class="val classical-color">{{ metrics.classical.MAPE }}%</span>
+                <span class="val-label">经典 LSTM</span>
+              </div>
+              <div class="metric-val">
+                <span class="val quantum-color">{{ metrics.hybrid.MAPE }}%</span>
+                <span class="val-label">量子混合</span>
+              </div>
+            </div>
+            <span class="metric-diff" :class="metrics.hybrid.MAPE < metrics.classical.MAPE ? 'improved' : 'degraded'">
+              {{ metrics.hybrid.MAPE < metrics.classical.MAPE ? '\u25BC' : '\u25B2' }}
+              {{ Math.abs(((metrics.hybrid.MAPE - metrics.classical.MAPE) / metrics.classical.MAPE) * 100).toFixed(1) }}%
+            </span>
+          </div>
+        </div>
+        <div v-else class="loading-spinner">暂无指标数据</div>
+      </div>
+
+      <!-- ==================== Section 5: 模型信息区 ==================== -->
+      <div class="card">
+        <div class="card-title">
+          <span class="dot quantum"></span>
+          模型架构信息
+        </div>
+        <div v-if="appInfo" class="info-grid">
+          <!-- 经典 LSTM 信息 -->
+          <div class="info-block">
+            <h4><span class="dot-classical">&#9679;</span> 经典 LSTM 配置</h4>
+            <ul class="info-list">
+              <li>
+                <span class="info-key">架构</span>
+                <span class="info-val highlight-classical">{{ classicalInfo.architecture || '-' }}</span>
+              </li>
+              <li>
+                <span class="info-key">LSTM 层数</span>
+                <span class="info-val">2</span>
+              </li>
+              <li>
+                <span class="info-key">隐藏维度</span>
+                <span class="info-val">64</span>
+              </li>
+              <li>
+                <span class="info-key">输入特征数</span>
+                <span class="info-val">7</span>
+              </li>
+              <li>
+                <span class="info-key">预测步长</span>
+                <span class="info-val">10 (未来1h逐6min)</span>
+              </li>
+              <li>
+                <span class="info-key">总参数量</span>
+                <span class="info-val highlight-classical">{{ classicalInfo.params || '-' }}</span>
+              </li>
+              <li>
+                <span class="info-key">学习率</span>
+                <span class="info-val">0.001</span>
+              </li>
+              <li>
+                <span class="info-key">训练轮数</span>
+                <span class="info-val">50 (early stopping)</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- 量子 VQC+LSTM 信息 -->
+          <div class="info-block">
+            <h4><span class="dot-quantum">&#9679;</span> 量子 VQC 层信息</h4>
+            <ul class="info-list">
+              <li>
+                <span class="info-key">架构</span>
+                <span class="info-val highlight-quantum">{{ hybridInfo.architecture || '-' }}</span>
+              </li>
+              <li>
+                <span class="info-key">量子比特数 (Qubits)</span>
+                <span class="info-val highlight-quantum">6</span>
+              </li>
+              <li>
+                <span class="info-key">变分层层数</span>
+                <span class="info-val highlight-quantum">2</span>
+              </li>
+              <li>
+                <span class="info-key">量子参数数</span>
+                <span class="info-val highlight-quantum">{{ hybridInfo.quantum_params || '-' }}</span>
+              </li>
+              <li>
+                <span class="info-key">电路深度</span>
+                <span class="info-val highlight-quantum">6 (编码+变分层x2+测量)</span>
+              </li>
+              <li>
+                <span class="info-key">总参数量</span>
+                <span class="info-val highlight-quantum">{{ hybridInfo.params || '-' }}</span>
+              </li>
+              <li>
+                <span class="info-key">编码方式</span>
+                <span class="info-val">角度编码 (Ry门)</span>
+              </li>
+              <li>
+                <span class="info-key">纠缠方式</span>
+                <span class="info-val">线性纠缠 (CX门)</span>
+              </li>
+              <li>
+                <span class="info-key">测量方式</span>
+                <span class="info-val">Z 期望值</span>
+              </li>
+              <li>
+                <span class="info-key">差异化学习率</span>
+                <span class="info-val">经典 lr=0.001 / 量子 lr=0.0005</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div v-else class="loading-spinner">加载模型信息中...</div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="app-footer">
+        短时降雨量量子混合预测系统 | 基于 Cqlib 量子计算框架 | FastAPI + Vue 3 + Element Plus + ECharts
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed, onMounted, nextTick } = Vue;
+    const API_BASE = '';  // 同源部署
+
+    const app = createApp({
+      setup() {
+        // ===== State =====
+        const backendStatus = ref('loading');
+        const selectedModel = ref('hybrid');
+        const predicting = ref(false);
+        const predictingBoth = ref(false);
+        const predictResult = ref(null);
+        const compareResult = ref(null);
+        const predictError = ref('');
+        const metrics = ref(null);
+        const metricsLoading = ref(false);
+        const metricsError = ref('');
+        const appInfo = ref(null);
+        const chartLoading = ref(false);
+
+        // Store last sample data for chart coordination
+        const samplePredictions = ref(null);
+
+        // Computed
+        const classicalInfo = computed(() => {
+          if (!appInfo.value || !appInfo.value.models) return {};
+          return appInfo.value.models.find(m => m.type === 'classical') || {};
+        });
+        const hybridInfo = computed(() => {
+          if (!appInfo.value || !appInfo.value.models) return {};
+          return appInfo.value.models.find(m => m.type === 'hybrid') || {};
+        });
+
+        // ===== Chart =====
+        let predictionChart = null;
+
+        function initPredictionChart(classicalData, hybridData, targetData) {
+          const el = document.getElementById('predictionChart');
+          if (!el) return;
+          if (!predictionChart) {
+            predictionChart = echarts.init(el);
+          }
+
+          // X轴：未来1小时逐6分钟
+          const xLabels = ['+6min', '+12min', '+18min', '+24min', '+30min', '+36min', '+42min', '+48min', '+54min', '+60min'];
+
+          const series = [];
+
+          if (targetData && targetData.length) {
+            series.push({
+              name: '真实值',
+              type: 'line',
+              data: targetData,
+              lineStyle: { color: '#e94560', width: 2.5 },
+              itemStyle: { color: '#e94560' },
+              symbol: 'circle',
+              symbolSize: 8,
+            });
+          }
+
+          if (classicalData && classicalData.length) {
+            series.push({
+              name: '经典 LSTM',
+              type: 'line',
+              data: classicalData,
+              lineStyle: { color: '#3b82f6', width: 2, type: 'dashed' },
+              itemStyle: { color: '#3b82f6' },
+              symbol: 'triangle',
+              symbolSize: 7,
+            });
+          }
+
+          if (hybridData && hybridData.length) {
+            series.push({
+              name: '量子混合 VQC+LSTM',
+              type: 'line',
+              data: hybridData,
+              lineStyle: { color: '#16c79a', width: 2.5, type: 'dashed' },
+              itemStyle: { color: '#16c79a' },
+              symbol: 'diamond',
+              symbolSize: 8,
+            });
+          }
+
+          predictionChart.setOption({
+            backgroundColor: 'transparent',
+            tooltip: {
+              trigger: 'axis',
+              backgroundColor: '#0f3460',
+              borderColor: '#1e3a5f',
+              textStyle: { color: '#e8eaf6', fontSize: 12 },
+            },
+            legend: {
+              data: series.map(s => s.name),
+              textStyle: { color: '#9ca3af', fontSize: 12 },
+              top: 0,
+            },
+            grid: {
+              left: '8%',
+              right: '4%',
+              top: '14%',
+              bottom: '10%',
+            },
+            xAxis: {
+              type: 'category',
+              data: xLabels,
+              axisLabel: { color: '#9ca3af', fontSize: 11 },
+              axisLine: { lineStyle: { color: '#1e3a5f' } },
+              name: '预测时刻',
+              nameTextStyle: { color: '#9ca3af', fontSize: 11 },
+            },
+            yAxis: {
+              type: 'value',
+              name: '降雨量 (mm)',
+              nameTextStyle: { color: '#9ca3af', fontSize: 11 },
+              axisLabel: { color: '#9ca3af', fontSize: 11 },
+              splitLine: { lineStyle: { color: '#1e3a5f', type: 'dashed' } },
+            },
+            series: series,
+          }, true);
+        }
+
+        // ===== API Calls =====
+        async function checkHealth() {
+          try {
+            const res = await fetch(`${API_BASE}/health`);
+            if (!res.ok) throw new Error('not ok');
+            const data = await res.json();
+            backendStatus.value = data.status === 'ok' ? 'ok' : 'error';
+          } catch (e) {
+            backendStatus.value = 'error';
+          }
+        }
+
+        async function loadInfo() {
+          try {
+            const res = await fetch(`${API_BASE}/api/info`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            appInfo.value = data;
+          } catch (e) {
+            console.error('加载应用信息失败:', e);
+          }
+        }
+
+        async function loadMetrics() {
+          metricsLoading.value = true;
+          metricsError.value = '';
+          try {
+            const res = await fetch(`${API_BASE}/api/metrics`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            metrics.value = data;
+          } catch (e) {
+            metricsError.value = '加载指标失败: ' + e.message;
+          } finally {
+            metricsLoading.value = false;
+          }
+        }
+
+        async function loadSamplePredictions() {
+          chartLoading.value = true;
+          try {
+            const res = await fetch(`${API_BASE}/api/sample-data?n_samples=1`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            if (data.samples && data.samples.length > 0) {
+              samplePredictions.value = data.samples[0];
+              const sample = data.samples[0];
+              await nextTick();
+              initPredictionChart(
+                sample.predictions.classical || [],
+                sample.predictions.hybrid || [],
+                sample.target || []
+              );
+            }
+          } catch (e) {
+            console.error('加载样本预测失败:', e);
+            await nextTick();
+            initPredictionChart([], [], []);
+          } finally {
+            chartLoading.value = false;
+          }
+        }
+
+        async function runPredict() {
+          predicting.value = true;
+          predictError.value = '';
+          predictResult.value = null;
+          compareResult.value = null;
+          try {
+            const res = await fetch(`${API_BASE}/api/predict`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                model_type: selectedModel.value,
+                use_sample: true,
+              }),
+            });
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              throw new Error(errData.detail || 'HTTP ' + res.status);
+            }
+            const data = await res.json();
+            predictResult.value = data;
+
+            // Update chart
+            const otherModel = selectedModel.value === 'classical' ? 'hybrid' : 'classical';
+            const currentPred = data.predictions;
+            const otherPred = samplePredictions.value
+              ? (samplePredictions.value.predictions[otherModel] || [])
+              : [];
+            const targetData = samplePredictions.value
+              ? (samplePredictions.value.target || [])
+              : [];
+
+            await nextTick();
+            if (selectedModel.value === 'classical') {
+              initPredictionChart(currentPred, otherPred, targetData);
+            } else {
+              initPredictionChart(otherPred, currentPred, targetData);
+            }
+          } catch (e) {
+            predictError.value = '预测失败: ' + e.message;
+          } finally {
+            predicting.value = false;
+          }
+        }
+
+        async function runPredictBoth() {
+          predictingBoth.value = true;
+          predictError.value = '';
+          predictResult.value = null;
+          compareResult.value = null;
+          try {
+            const [resC, resH] = await Promise.all([
+              fetch(`${API_BASE}/api/predict`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ model_type: 'classical', use_sample: true }),
+              }),
+              fetch(`${API_BASE}/api/predict`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ model_type: 'hybrid', use_sample: true }),
+              }),
+            ]);
+
+            if (!resC.ok || !resH.ok) {
+              throw new Error('预测请求失败');
+            }
+
+            const dataC = await resC.json();
+            const dataH = await resH.json();
+
+            compareResult.value = {
+              classical: dataC.predictions,
+              hybrid: dataH.predictions,
+            };
+
+            await nextTick();
+            initPredictionChart(dataC.predictions, dataH.predictions, []);
+          } catch (e) {
+            predictError.value = '对比预测失败: ' + e.message;
+          } finally {
+            predictingBoth.value = false;
+          }
+        }
+
+        // ===== Lifecycle =====
+        onMounted(async () => {
+          await checkHealth();
+          // Parallel load
+          await Promise.all([
+            loadInfo(),
+            loadMetrics(),
+            loadSamplePredictions(),
+          ]);
+          // Resize chart on window resize
+          window.addEventListener('resize', () => {
+            predictionChart && predictionChart.resize();
+          });
+        });
+
+        return {
+          backendStatus,
+          selectedModel,
+          predicting,
+          predictingBoth,
+          predictResult,
+          compareResult,
+          predictError,
+          metrics,
+          metricsLoading,
+          metricsError,
+          appInfo,
+          classicalInfo,
+          hybridInfo,
+          chartLoading,
+          runPredict,
+          runPredictBoth,
+        };
+      },
+    });
+
+    // Register Element Plus
+    app.use(ElementPlus);
+
+    // Register Element Plus Icons
+    if (window.ElementPlusIconsVue) {
+      for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+        app.component(key, component);
+      }
+    }
+
+    app.mount('#app');
+  </script>
+</body>
+</html>
