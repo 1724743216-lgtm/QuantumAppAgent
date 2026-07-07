@@ -53,21 +53,64 @@ function ensurePythonEnv() {
     const backendDir = path.join(process.resourcesPath, 'backend');
     const pythonDir = path.join(backendDir, 'backend_python');
     const tarPath = path.join(backendDir, 'backend_python.tar');
+    const markerFile = path.join(pythonDir, '.extracted_success');
 
-    if (fs.existsSync(pythonDir) || !fs.existsSync(tarPath)) {
+    if (fs.existsSync(markerFile)) {
       return resolve();
     }
 
-    console.log('Extracting Python environment using npm tar...');
-    if (splashWindow && !splashWindow.isDestroyed()) {
-      splashWindow.webContents.executeJavaScript(`document.getElementById('status').innerText = '首次启动，正在解压运行环境 (约需1-2分钟)，请耐心等待...'`);
+    if (!fs.existsSync(tarPath)) {
+      return resolve();
     }
 
+    if (fs.existsSync(pythonDir)) {
+      try {
+        fs.rmSync(pythonDir, { recursive: true, force: true });
+      } catch(e) {
+        console.error('Failed to remove corrupted python dir', e);
+      }
+    }
+
+    const updateStatus = (msg) => {
+      if (splashWindow && !splashWindow.isDestroyed()) {
+        splashWindow.webContents.executeJavaScript(`document.getElementById('status').innerText = '${msg}'`);
+      }
+    };
+
+    updateStatus('尝试使用系统加速引擎解压...');
     try {
+      await new Promise((res, rej) => {
+        const nativeTar = spawn('tar', ['-xf', 'backend_python.tar'], { cwd: backendDir, shell: true, windowsHide: true });
+        nativeTar.on('close', (code) => {
+          if (code === 0) res();
+          else rej(new Error(`Native tar failed with code ${code}`));
+        });
+        nativeTar.on('error', rej);
+      });
+      
+      fs.writeFileSync(markerFile, 'ok');
+      try { fs.unlinkSync(tarPath); } catch(e) {}
+      return resolve();
+    } catch (err) {
+      console.log('Native tar failed, falling back to node tar:', err.message);
+    }
+
+    updateStatus('正在使用内置引擎解压运行环境...');
+    try {
+      let fileCount = 0;
       await tar.x({
         file: tarPath,
-        cwd: backendDir
+        cwd: backendDir,
+        onentry: (entry) => {
+          fileCount++;
+          if (fileCount % 500 === 0) {
+            updateStatus(`正在释放文件... 已处理 ${fileCount} 个文件`);
+          }
+        }
       });
+      
+      fs.writeFileSync(markerFile, 'ok');
+      try { fs.unlinkSync(tarPath); } catch(e) {}
       resolve();
     } catch (err) {
       reject(new Error(`Node tar extraction failed: ${err.message}`));
