@@ -1,8 +1,8 @@
 {
-  "name": "@evoscientist/webui",
+  "name": "@tyqa/webui",
   "version": "0.1.7",
-  "description": "Web UI for EvoScientist — a self-evolving AI scientist built on DeepAgents/LangGraph.",
-  "author": "Xi Zhang <zacharyzhang2022@gmail.com>",
+  "description": "Web UI for tyqa — a self-evolving AI scientist built on DeepAgents/LangGraph.",
+  "author": "lw",
   "type": "module",
   "license": "Apache-2.0",
   "keywords": [
@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/EvoScientist/EvoScientist-WebUI#readme",
   "bin": {
-    "evoscientist-webui": "./bin/evoscientist-webui.mjs"
+    "tyqa-webui": "./bin/tyqa-webui.mjs"
   },
   "files": [
     "bin/",
@@ -38,7 +38,7 @@
   },
   "scripts": {
     "dev": "next dev --turbopack --port 4716",
-    "build": "next build",
+    "build": "next build && node scripts/assemble-standalone.mjs",
     "start": "next start --port 4716",
     "start:dist": "node dist/server.js",
     "lint": "eslint .",

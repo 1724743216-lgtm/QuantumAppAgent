@@ -1,0 +1,445 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Set default outline color to match brand instead of browser blue */
+  * {
+    outline-color: hsl(var(--primary));
+  }
+
+  :root {
+    /* App-specific color variables */
+    /* App-specific colors — warm "paper" palette. Light mode: ivory
+       background, true-white cards, warm charcoal text. */
+    --color-primary: #020814;
+    --color-user-message: #1664FF;
+    --color-user-message-bg: #F3F7FF;
+    --color-avatar-bg: #ECF2FF;
+    --color-secondary: #41464F;
+    --color-success: #00C7E7;
+    --color-warning: #BB79E1;
+    --color-error: #FB4214;
+    --color-background: #F4F7FC;
+    --color-subagent-hover: #F3F7FF;
+    --color-surface: #FFFFFF;
+    --color-border: #DCE0EB;
+    --color-border-light: #ECF2FF;
+    --color-text-primary: #020814;
+    --color-text-secondary: #41464F;
+    --color-text-tertiary: #939AAB;
+    --color-file-button: #FFFFFF;
+    --color-file-button-hover: #ECF2FF;
+
+    /* Brand accent — single source of truth = EvoScientist cyan (#00BCD4,
+       deepened to #00788f so white text passes WCAG AA on the warm paper bg).
+       The warm "paper" base stays; cyan carries the EvoScientist identity. */
+    --brand: #1664FF;
+    --brand-hover: #1F84FC;
+    /* Solid filled-button background. Same as --brand in light; in dark it's a
+       deeper, calmer cyan so buttons don't glow (see .dark). White text on both. */
+    --brand-solid: #1664FF;
+    --brand-foreground: #FFFFFF;
+
+    /* deep-agents-ui base tokens. Its tailwind.config.mjs maps semantic classes
+       (text-primary, text-tertiary, text-success, text-warning, bg-secondary,
+       border-primary, the global scrollbar) to these LangSmith-style vars, but
+       the base never defined them, so those classes rendered colorless. Alias
+       them to our palette. Declared once: the var() refs resolve per-mode at the
+       use site because the referenced color tokens are overridden in .dark. */
+    --text-primary: var(--color-text-primary);
+    --text-secondary: var(--color-text-secondary);
+    --text-tertiary: var(--color-text-tertiary);
+    --text-quaternary: var(--color-text-tertiary);
+    --text-success: var(--color-success);
+    --text-warning: var(--color-warning);
+    --text-error: var(--color-error);
+    --border-primary: var(--color-border);
+    --border-secondary: var(--color-border-light);
+    --bg-primary: var(--color-background);
+    --bg-secondary: hsl(var(--secondary));
+    --scrollbar-thumb: var(--color-border);
+    --scrollbar-thumb-hover: var(--color-text-tertiary);
+
+    /* Spacing variables */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+
+    /* Font family variables */
+    --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+    --font-family-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono",
+      Consolas, "Courier New", monospace;
+
+    /* Font size variables */
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+
+    /* Font weight variables */
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+
+    /* Line height variables */
+    --line-height-tight: 1.25;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+
+    /* Border radius variables */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-full: 9999px;
+
+    /* Shadow variables */
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    /* Transition variables */
+    --transition-base: 200ms ease;
+
+    /* Layout variables */
+    --sidebar-width: 320px;
+    --sidebar-collapsed-width: 60px;
+    --header-height: 64px;
+    --panel-width: 40vw;
+    --chat-max-width: 900px;
+
+    /* Tailwind/Radix UI component variables */
+    --radius: 0.5rem;
+    --background: 217.5 57.1% 97.3%;
+    --foreground: 220 81.8% 4.3%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 81.8% 4.3%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 81.8% 4.3%;
+    --primary: 219.9 100% 54.3%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 100% 97.6%;
+    --secondary-foreground: 218.6 9.7% 28.2%;
+    --muted: 220 100% 97.6%;
+    --muted-foreground: 222.5 12.5% 62.4%;
+    --accent: 221.1 100% 96.3%;
+    --accent-foreground: 220 81.8% 4.3%;
+    --destructive: 11.9 96.7% 53.1%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 224 27.3% 89.2%;
+    --input: 224 27.3% 89.2%;
+    --ring: 219.9 100% 54.3%;
+    --sidebar: 220 100% 97.6%;
+    --chart-1: 219.9 100% 54.3%;
+    --chart-2: 188.3 100% 45.3%;
+    --chart-3: 278.1 63.4% 67.8%;
+    --chart-4: 253.5 88.4% 76.3%;
+    --chart-5: 220.1 100% 64.5%;
+  }
+
+  /* Dark theme — applied via the `.dark` class on <html> (set by ThemeProvider
+     and the inline pre-paint script). Tailwind's darkMode: ["class", …] drives
+     `dark:` utilities off the same class, so CSS variables and utilities switch
+     together. The default theme follows the system preference. */
+  .dark {
+    /* App-specific colors — warm charcoal dark mode (the same paper identity,
+       lifted): near-black warm background, book-cloth terracotta accent. */
+    --color-primary: #ece7dc;
+    --color-user-message: #a9dce6;
+    --color-user-message-bg: #16343b;
+    --color-avatar-bg: #3a2e27;
+    --color-secondary: #ada694;
+    --color-success: #5dbe85;
+    --color-warning: #e0a94a;
+    --color-error: #e0796b;
+    --color-background: #23211d;
+    --color-subagent-hover: #3a2e27;
+    --color-surface: #2c2a25;
+    --color-border: #3a372f;
+    --color-border-light: #332f2a;
+    --color-text-primary: #ece7dc;
+    --color-text-secondary: #ada694;
+    --color-text-tertiary: #908d83;
+    --color-file-button: #2c2a25;
+    --color-file-button-hover: #332f2a;
+    --brand: #3b9cb0;
+    --brand-hover: #46a9bd;
+    /* Deep, saturated cyan fill: colorful (S~90%) but low-lightness so it
+       doesn't glow on the dark card; white text passes AA (4.82:1). */
+    --brand-solid: #087d91;
+    --brand-foreground: #ffffff;
+
+    /* Tailwind/Radix UI component variables for dark mode */
+    --radius: 0.5rem;
+    --background: 40 9% 13%;
+    --foreground: 41 30% 89%;
+    --card: 43 9% 16%;
+    --card-foreground: 41 30% 89%;
+    --popover: 43 9% 16%;
+    --popover-foreground: 41 30% 89%;
+    --primary: 189 90% 30%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 33 10% 18%;
+    --secondary-foreground: 41 30% 89%;
+    --muted: 38 10% 16%;
+    --muted-foreground: 43 13% 63%;
+    --accent: 196 14% 20%;
+    --accent-foreground: 41 30% 89%;
+    --destructive: 7 65% 65%;
+    --destructive-foreground: 30 13% 12%;
+    --border: 44 10% 21%;
+    --input: 44 10% 21%;
+    --ring: 190 50% 46%;
+    --sidebar: 36 9% 11%;
+    --chart-1: 190 52% 50%;
+    --chart-2: 173 39% 54%;
+    --chart-3: 40 68% 62%;
+    --chart-4: 215 37% 63%;
+    --chart-5: 332 39% 64%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+button,
+a {
+  touch-action: manipulation;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  background-color: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--color-text-primary);
+}
+
+h1 {
+  font-size: 1.875rem;
+}
+h2 {
+  font-size: 1.5rem;
+}
+h3 {
+  font-size: 1.25rem;
+}
+h4 {
+  font-size: 1.125rem;
+}
+h5 {
+  font-size: 1rem;
+}
+h6 {
+  font-size: 0.875rem;
+}
+
+p {
+  margin-bottom: 1rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+a {
+  color: var(--brand);
+  text-decoration: none;
+  transition: opacity 200ms ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+code {
+  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas,
+    "Courier New", monospace;
+  font-size: 0.9em;
+  padding: 0.125em 0.25em;
+  background-color: var(--color-surface);
+  border-radius: 0.25rem;
+}
+
+pre {
+  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas,
+    "Courier New", monospace;
+  font-size: 0.875rem;
+  line-height: 1.75;
+  padding: 1rem;
+  background-color: var(--color-surface);
+  border-radius: 0.375rem;
+  overflow-x: auto;
+
+  code {
+    padding: 0;
+    background-color: transparent;
+  }
+}
+
+ul,
+ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+li {
+  margin-bottom: 0.25rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Optimization Window animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Custom scrollbar styles */
+.scrollbar-pretty {
+  overflow-y: scroll;
+}
+
+.scrollbar-pretty::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-pretty::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-pretty::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--border));
+  border-radius: 9999px;
+}
+
+.scrollbar-pretty::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.6);
+}
+
+/* KaTeX can produce very wide display equations; keep chat layouts bounded on
+   narrow screens while preserving horizontal scroll for the formula itself. */
+.katex {
+  color: inherit;
+}
+
+.katex-display {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25rem 0;
+}
+
+.katex-display > .katex {
+  max-width: 100%;
+}
+
+/* Global diff highlighting styles */
+.word-added {
+  background-color: rgba(46, 160, 67, 0.4);
+  color: #ffffff;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+.word-removed {
+  background-color: rgba(248, 81, 73, 0.4);
+  color: #ffffff;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: 600;
+  text-decoration: line-through;
+  text-decoration-color: #f85149;
+}
