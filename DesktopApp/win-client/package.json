@@ -31,7 +31,10 @@
           "!DesktopApp",
           "!.github${/*}",
           "!.vscode${/*}",
-          "!dist${/*}"
+          "!dist${/*}",
+          "!__pycache__${/*}",
+          "!.venv${/*}",
+          "!.pytest_cache${/*}"
         ]
       }
     ],
@@ -39,11 +42,13 @@
       "target": "nsis"
     },
     "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Tianyan Quantum AI"
+      "shortcutName": "Tianyan Quantum AI",
+      "deleteAppDataOnUninstall": false
     }
   },
   "devDependencies": {
