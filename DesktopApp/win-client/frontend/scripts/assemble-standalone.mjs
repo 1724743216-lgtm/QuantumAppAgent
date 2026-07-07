@@ -1,13 +1,15 @@
-// Assemble a self-contained server into dist/ from the Next standalone output.
-// `next build` with output:"standalone" produces:
-//   .next/standalone/  (server.js + traced node_modules + .next/server)
-//   .next/static/      (NOT inside standalone — must be copied)
-// We copy everything into dist/ so the published package ships one folder that
-// `node dist/server.js` can run.
 import { cp, rm, readdir } from "fs/promises";
 import { existsSync } from "fs";
 
-const STANDALONE = ".next/standalone/frontend";
+let STANDALONE = ".next/standalone";
+if (!existsSync(`${STANDALONE}/server.js`)) {
+  if (existsSync(`${STANDALONE}/frontend/server.js`)) {
+    STANDALONE = `${STANDALONE}/frontend`;
+  } else if (existsSync(`${STANDALONE}/DesktopApp/win-client/frontend/server.js`)) {
+    STANDALONE = `${STANDALONE}/DesktopApp/win-client/frontend`;
+  }
+}
+
 const STATIC = ".next/static";
 const PUBLIC = "public";
 const OUT = "dist";
@@ -26,9 +28,6 @@ if (existsSync(PUBLIC)) {
   await cp(PUBLIC, `${OUT}/public`, { recursive: true });
 }
 
-// Next copies the whole project root into the standalone bundle. Prune it down
-// to just the runtime essentials (drops src/, configs, and local notes so
-// they never get published).
 const KEEP = new Set([
   "server.js",
   ".next",
@@ -42,9 +41,6 @@ for (const entry of await readdir(OUT)) {
   }
 }
 
-// Strip source maps (*.map): debug-only artifacts the published runtime never
-// needs. Removing them keeps the package lean and avoids shipping a stack-trace
-// → source mapping. Safe to delete — source maps are never required at runtime.
 let strippedMaps = 0;
 for (const entry of await readdir(OUT, { recursive: true })) {
   if (entry.endsWith(".map")) {
