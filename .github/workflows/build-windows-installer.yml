@@ -7,9 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: windows-latest
-
+  build-frontend:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -18,6 +17,33 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Install Frontend Dependencies
+        working-directory: DesktopApp/win-client/frontend
+        run: npm install
+
+      - name: Build Frontend
+        working-directory: DesktopApp/win-client/frontend
+        run: npm run build
+
+      - name: Upload Frontend Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: DesktopApp/win-client/frontend/dist
+
+  build-windows:
+    needs: build-frontend
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Frontend Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: DesktopApp/win-client/frontend/dist
 
       - name: Install uv (Python Package Manager)
         uses: astral-sh/setup-uv@v5
@@ -33,14 +59,6 @@ jobs:
           uv venv
           uv sync
 
-      - name: Install Frontend Dependencies
-        working-directory: DesktopApp/win-client/frontend
-        run: npm install
-
-      - name: Build Frontend
-        working-directory: DesktopApp/win-client/frontend
-        run: npm run build
-
       - name: Install Electron Dependencies
         working-directory: DesktopApp/win-client
         run: npm install
@@ -49,7 +67,7 @@ jobs:
         working-directory: DesktopApp/win-client
         run: npm run build:win
 
-      - name: Upload Artifact
+      - name: Upload Installer
         uses: actions/upload-artifact@v4
         with:
           name: Tianyan-Quantum-AI-Installer
