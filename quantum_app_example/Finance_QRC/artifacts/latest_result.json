@@ -1,1 +1,202 @@
-/Users/lizhaowei/code/EvoScientist/finance-qrc/artifacts/qrc_experiment_20260623_143302.json
+{
+  "experiment_config": {
+    "tickers": [
+      "AAPL",
+      "MSFT",
+      "JPM",
+      "JNJ",
+      "V"
+    ],
+    "n_qubits": 4,
+    "reservoir_depth": 2,
+    "window_size": 5,
+    "n_reservoir": 100,
+    "seeds": [
+      42
+    ],
+    "data_range": "2023-01-01 ~ 2025-01-01"
+  },
+  "results": [
+    {
+      "ticker": "AAPL",
+      "n_qubits": 4,
+      "reservoir_depth": 2,
+      "window_size": 5,
+      "n_reservoir_classic": 100,
+      "seed": 42,
+      "train_samples": 397,
+      "test_samples": 100,
+      "classic_rc": {
+        "RMSE": 4.742168,
+        "MAE": 3.831057,
+        "MAPE": 1.628488,
+        "training_time": 0.0184,
+        "prediction_time": 0.0014,
+        "n_params": 9702,
+        "n_reservoir": 100
+      },
+      "quantum_rc": {
+        "RMSE": 5.990079,
+        "MAE": 5.264387,
+        "MAPE": 2.266206,
+        "training_time": 0.091,
+        "prediction_time": 0.0205,
+        "n_params": 46,
+        "n_qubits": 4,
+        "reservoir_depth": 2,
+        "circuit_params": 20
+      },
+      "comparison": {
+        "rmse_improvement_pct": -26.3152,
+        "qrc_better": false,
+        "param_ratio": 0.0047,
+        "speed_ratio": 4.9457
+      }
+    },
+    {
+      "ticker": "MSFT",
+      "n_qubits": 4,
+      "reservoir_depth": 2,
+      "window_size": 5,
+      "n_reservoir_classic": 100,
+      "seed": 42,
+      "train_samples": 397,
+      "test_samples": 100,
+      "classic_rc": {
+        "RMSE": 5.25431,
+        "MAE": 3.892265,
+        "MAPE": 0.930158,
+        "training_time": 0.0055,
+        "prediction_time": 0.0007,
+        "n_params": 9702,
+        "n_reservoir": 100
+      },
+      "quantum_rc": {
+        "RMSE": 7.029347,
+        "MAE": 5.83367,
+        "MAPE": 1.391698,
+        "training_time": 0.0835,
+        "prediction_time": 0.0213,
+        "n_params": 46,
+        "n_qubits": 4,
+        "reservoir_depth": 2,
+        "circuit_params": 20
+      },
+      "comparison": {
+        "rmse_improvement_pct": -33.7825,
+        "qrc_better": false,
+        "param_ratio": 0.0047,
+        "speed_ratio": 15.1818
+      }
+    },
+    {
+      "ticker": "JPM",
+      "n_qubits": 4,
+      "reservoir_depth": 2,
+      "window_size": 5,
+      "n_reservoir_classic": 100,
+      "seed": 42,
+      "train_samples": 397,
+      "test_samples": 100,
+      "classic_rc": {
+        "RMSE": 8.904956,
+        "MAE": 7.153104,
+        "MAPE": 3.150059,
+        "training_time": 0.0058,
+        "prediction_time": 0.0007,
+        "n_params": 9702,
+        "n_reservoir": 100
+      },
+      "quantum_rc": {
+        "RMSE": 4.834811,
+        "MAE": 3.62158,
+        "MAPE": 1.655338,
+        "training_time": 0.083,
+        "prediction_time": 0.0209,
+        "n_params": 46,
+        "n_qubits": 4,
+        "reservoir_depth": 2,
+        "circuit_params": 20
+      },
+      "comparison": {
+        "rmse_improvement_pct": 45.7065,
+        "qrc_better": true,
+        "param_ratio": 0.0047,
+        "speed_ratio": 14.3103
+      }
+    },
+    {
+      "ticker": "JNJ",
+      "n_qubits": 4,
+      "reservoir_depth": 2,
+      "window_size": 5,
+      "n_reservoir_classic": 100,
+      "seed": 42,
+      "train_samples": 397,
+      "test_samples": 100,
+      "classic_rc": {
+        "RMSE": 1.233783,
+        "MAE": 0.986259,
+        "MAPE": 0.655631,
+        "training_time": 0.0058,
+        "prediction_time": 0.0007,
+        "n_params": 9702,
+        "n_reservoir": 100
+      },
+      "quantum_rc": {
+        "RMSE": 1.54181,
+        "MAE": 1.228056,
+        "MAPE": 0.815099,
+        "training_time": 0.082,
+        "prediction_time": 0.0207,
+        "n_params": 46,
+        "n_qubits": 4,
+        "reservoir_depth": 2,
+        "circuit_params": 20
+      },
+      "comparison": {
+        "rmse_improvement_pct": -24.9661,
+        "qrc_better": false,
+        "param_ratio": 0.0047,
+        "speed_ratio": 14.1379
+      }
+    },
+    {
+      "ticker": "V",
+      "n_qubits": 4,
+      "reservoir_depth": 2,
+      "window_size": 5,
+      "n_reservoir_classic": 100,
+      "seed": 42,
+      "train_samples": 397,
+      "test_samples": 100,
+      "classic_rc": {
+        "RMSE": 7.739998,
+        "MAE": 5.841484,
+        "MAPE": 1.941857,
+        "training_time": 0.0055,
+        "prediction_time": 0.0006,
+        "n_params": 9702,
+        "n_reservoir": 100
+      },
+      "quantum_rc": {
+        "RMSE": 5.31879,
+        "MAE": 4.332007,
+        "MAPE": 1.495991,
+        "training_time": 0.0816,
+        "prediction_time": 0.0206,
+        "n_params": 46,
+        "n_qubits": 4,
+        "reservoir_depth": 2,
+        "circuit_params": 20
+      },
+      "comparison": {
+        "rmse_improvement_pct": 31.2818,
+        "qrc_better": true,
+        "param_ratio": 0.0047,
+        "speed_ratio": 14.8364
+      }
+    }
+  ],
+  "timestamp": "20260623_143302"
+}
