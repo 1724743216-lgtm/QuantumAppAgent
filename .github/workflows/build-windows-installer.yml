@@ -4,14 +4,11 @@ on:
   push:
     branches:
       - quantum-app-agent
-  workflow_dispatch:  # Allows manual triggering
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on:
-  push:
-    branches:
-      - quantum-app-agent windows-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repository
@@ -20,10 +17,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version:
-  push:
-    branches:
-      - quantum-app-agent '20'
+          node-version: '20'
 
       - name: Install uv (Python Package Manager)
         uses: astral-sh/setup-uv@v5
@@ -38,6 +32,12 @@ jobs:
         run: |
           uv venv
           uv sync
+
+      - name: Build Frontend
+        working-directory: DesktopApp/win-client/frontend
+        run: |
+          npm install
+          npm run build
 
       - name: Install Electron Dependencies
         working-directory: DesktopApp/win-client
