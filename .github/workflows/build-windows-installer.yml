@@ -33,11 +33,9 @@ jobs:
           uv venv
           uv sync
 
-      - name: Build Frontend
+      - name: Install Frontend Dependencies
         working-directory: DesktopApp/win-client/frontend
-        run: |
-          npm install
-          npm run build
+        run: npm install --omit=dev
 
       - name: Install Electron Dependencies
         working-directory: DesktopApp/win-client
