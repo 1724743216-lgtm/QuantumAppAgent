@@ -1,11 +1,17 @@
 name: Build Windows Installer
 
 on:
+  push:
+    branches:
+      - quantum-app-agent
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on:
+  push:
+    branches:
+      - quantum-app-agent windows-latest
 
     steps:
       - name: Checkout repository
@@ -14,7 +20,10 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version:
+  push:
+    branches:
+      - quantum-app-agent '20'
 
       - name: Install uv (Python Package Manager)
         uses: astral-sh/setup-uv@v5
