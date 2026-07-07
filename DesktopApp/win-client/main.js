@@ -141,12 +141,13 @@ function startBackend() {
     });
 
     let isDead = false;
+    let portReady = false;
     backendProcess.on('exit', (code) => {
       isDead = true;
-      if (code !== 0 && code !== null) {
+      if (!portReady) {
         const logPath = path.join(app.getPath('userData'), 'backend_crash.log');
-        fs.writeFileSync(logPath, backendErrorLog);
-        dialog.showErrorBox('后端服务崩溃', `后端服务异常退出 (错误码: ${code})\n\n错误信息：\n${backendErrorLog.substring(0, 500)}\n\n完整日志已保存至: ${logPath}`);
+        fs.writeFileSync(logPath, backendErrorLog || 'No error log. Exit code: ' + code);
+        dialog.showErrorBox('后端服务崩溃', `后端服务过早退出 (退出码: ${code})\n\n错误信息：\n${backendErrorLog.substring(0, 500)}\n\n完整日志已保存至: ${logPath}`);
         app.quit();
       }
     });
@@ -165,6 +166,7 @@ function startBackend() {
       const socket = new net.Socket();
       socket.setTimeout(1000);
       socket.on('connect', () => {
+        portReady = true;
         socket.destroy();
         resolve();
       });
@@ -202,15 +204,31 @@ function startServer() {
       stdio: 'inherit'
     });
 
+    let isServerDead = false;
+    let serverPortReady = false;
+
+    serverProcess.on('exit', (code) => {
+      isServerDead = true;
+      if (!serverPortReady) {
+        dialog.showErrorBox('前端服务崩溃', `前端服务过早退出 (退出码: ${code})\n请检查前端环境是否正常。`);
+        app.quit();
+      }
+    });
+
     serverProcess.on('error', (err) => {
+      isServerDead = true;
       console.error('Failed to start server:', err);
+      dialog.showErrorBox('启动失败', '无法启动前端 Node.js 服务。\n' + err.message);
+      app.quit();
       reject(err);
     });
 
     const checkPort = () => {
+      if (isServerDead) return reject(new Error("Server process died before port was ready"));
       const socket = new net.Socket();
       socket.setTimeout(1000);
       socket.on('connect', () => {
+        serverPortReady = true;
         socket.destroy();
         resolve();
       });
