@@ -8,6 +8,7 @@ let mainWindow;
 let splashWindow;
 let serverProcess;
 let backendProcess;
+let tarProcess;
 const PORT = 4716;
 const BACKEND_PORT = 6174;
 
@@ -62,9 +63,10 @@ function ensurePythonEnv() {
       splashWindow.webContents.executeJavaScript(`document.getElementById('status').innerText = '首次启动，正在解压运行环境 (约需1-2分钟)，请耐心等待...'`);
     }
 
-    const tarProcess = spawn('tar', ['-xf', 'backend_python.tar'], { cwd: backendDir, windowsHide: true });
+    tarProcess = spawn('tar', ['-xf', 'backend_python.tar'], { cwd: backendDir, windowsHide: true });
     
     tarProcess.on('close', (code) => {
+      tarProcess = null;
       if (code === 0) {
         resolve();
       } else {
@@ -144,7 +146,7 @@ function startBackend() {
       if (code !== 0 && code !== null) {
         const logPath = path.join(app.getPath('userData'), 'backend_crash.log');
         fs.writeFileSync(logPath, backendErrorLog);
-        dialog.showErrorBox('后端服务崩溃', \`后端服务异常退出 (错误码: \${code})\\n\\n错误信息：\\n\${backendErrorLog.substring(0, 500)}\\n\\n完整日志已保存至: \${logPath}\`);
+        dialog.showErrorBox('后端服务崩溃', `后端服务异常退出 (错误码: ${code})\n\n错误信息：\n${backendErrorLog.substring(0, 500)}\n\n完整日志已保存至: ${logPath}`);
         app.quit();
       }
     });
@@ -288,6 +290,9 @@ app.on('window-all-closed', function () {
 });
 
 app.on('quit', () => {
+  if (tarProcess) {
+    tarProcess.kill();
+  }
   if (serverProcess) {
     serverProcess.kill();
   }
