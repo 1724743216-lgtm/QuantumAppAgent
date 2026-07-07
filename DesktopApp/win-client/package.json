@@ -32,6 +32,8 @@
           "!DesktopApp",
           "!.github${/*}",
           "!.vscode${/*}",
+          "!.venv${/*}",
+          "!.venv",
           "!dist${/*}",
           "!__pycache__${/*}",
           "!.pytest_cache${/*}"

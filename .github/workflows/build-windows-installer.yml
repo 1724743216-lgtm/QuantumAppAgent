@@ -62,8 +62,16 @@ jobs:
           mv python backend_python
 
       - name: Install Python Backend Dependencies
+        shell: bash
         run: |
           uv pip install --system --python backend_python/python.exe .
+          
+      - name: Compress Python Environment
+        shell: bash
+        run: |
+          # 压缩环境以解决 NSIS 解压几万个小文件导致安装卡死（“一直在刷正在安装”）的问题
+          tar -cf backend_python.tar backend_python
+          rm -rf backend_python
 
       - name: Install Electron Dependencies
         working-directory: DesktopApp/win-client

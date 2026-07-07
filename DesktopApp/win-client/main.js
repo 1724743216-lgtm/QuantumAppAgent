@@ -1,16 +1,74 @@
-const { app, BrowserWindow } = require('electron');
-const { fork, spawn } = require('child_process');
+const { app, BrowserWindow, dialog } = require('electron');
+const { fork, spawn, execSync } = require('child_process');
 const path = require('path');
 const net = require('net');
+const fs = require('fs');
 
 let mainWindow;
+let splashWindow;
 let serverProcess;
 let backendProcess;
 const PORT = 4716;
 const BACKEND_PORT = 6174;
 
+function createSplashWindow() {
+  splashWindow = new BrowserWindow({
+    width: 400,
+    height: 300,
+    frame: false,
+    alwaysOnTop: true,
+    transparent: true,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
+    }
+  });
+
+  // Simple HTML splash screen
+  const splashHtml = `
+    <!DOCTYPE html>
+    <html>
+    <body style="margin: 0; padding: 0; background: #1e1e1e; color: #fff; font-family: system-ui; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; border-radius: 8px;">
+      <h2 style="margin-bottom: 10px;">TYQA 客户端</h2>
+      <p id="status">正在初始化运行环境，请稍候...</p>
+      <div style="width: 80%; height: 4px; background: #333; margin-top: 20px; border-radius: 2px; overflow: hidden;">
+        <div style="width: 50%; height: 100%; background: #007acc; animation: indeterminate 1.5s infinite linear;"></div>
+      </div>
+      <style>
+        @keyframes indeterminate {
+          0% { transform: translateX(-100%); width: 50%; }
+          100% { transform: translateX(200%); width: 50%; }
+        }
+      </style>
+    </body>
+    </html>
+  `;
+  splashWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(splashHtml)}`);
+}
+
+function ensurePythonEnv() {
+  if (!app.isPackaged) return;
+  const backendDir = path.join(process.resourcesPath, 'backend');
+  const pythonDir = path.join(backendDir, 'backend_python');
+  const tarPath = path.join(backendDir, 'backend_python.tar');
+
+  if (!fs.existsSync(pythonDir) && fs.existsSync(tarPath)) {
+    console.log('Extracting Python environment...');
+    try {
+      // Windows 10+ includes tar
+      execSync('tar -xf backend_python.tar', { cwd: backendDir, windowsHide: true });
+    } catch (err) {
+      console.error('Failed to extract Python environment:', err);
+      dialog.showErrorBox('初始化失败', '无法解压运行环境，请尝试以管理员身份运行。');
+      app.quit();
+    }
+  }
+}
+
 function startBackend() {
   return new Promise((resolve, reject) => {
+    ensurePythonEnv();
+
     // If packaged, backend env is inside resources/backend/.venv
     const backendDir = app.isPackaged 
       ? path.join(process.resourcesPath, 'backend') 
@@ -143,6 +201,10 @@ function createWindow() {
   mainWindow.loadURL(`http://127.0.0.1:${PORT}`);
 
   mainWindow.webContents.on('did-finish-load', () => {
+    if (splashWindow && !splashWindow.isDestroyed()) {
+      splashWindow.close();
+      splashWindow = null;
+    }
     mainWindow.webContents.executeJavaScript(`
       const currentConfig = JSON.parse(localStorage.getItem('evoscientist-config') || '{}');
       if (currentConfig.deploymentUrl !== 'http://127.0.0.1:6174') {
@@ -162,6 +224,7 @@ function createWindow() {
 
 app.whenReady().then(async () => {
   try {
+    createSplashWindow();
     console.log('Starting local Python backend...');
     await startBackend();
     console.log('Starting local Node frontend...');
@@ -170,6 +233,7 @@ app.whenReady().then(async () => {
     createWindow();
   } catch (error) {
     console.error('Could not start services:', error);
+    dialog.showErrorBox('启动失败', '无法启动后台服务，请检查日志。');
     app.quit();
   }
 
