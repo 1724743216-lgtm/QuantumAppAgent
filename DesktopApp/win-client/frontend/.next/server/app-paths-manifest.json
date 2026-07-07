@@ -1,0 +1,18 @@
+{
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/evosci-config/route": "app/api/evosci-config/route.js",
+  "/api/memory/executions/route": "app/api/memory/executions/route.js",
+  "/api/memory/observations/route": "app/api/memory/observations/route.js",
+  "/api/memory/route": "app/api/memory/route.js",
+  "/api/skills/catalog/route": "app/api/skills/catalog/route.js",
+  "/api/skills/detail/route": "app/api/skills/detail/route.js",
+  "/api/skills/install/route": "app/api/skills/install/route.js",
+  "/api/skills/route": "app/api/skills/route.js",
+  "/api/workspace/download/route": "app/api/workspace/download/route.js",
+  "/api/workspace/file/route": "app/api/workspace/file/route.js",
+  "/api/workspace/route": "app/api/workspace/route.js",
+  "/api/workspace/upload/route": "app/api/workspace/upload/route.js",
+  "/icon.png/route": "app/icon.png/route.js",
+  "/page": "app/page.js"
+}

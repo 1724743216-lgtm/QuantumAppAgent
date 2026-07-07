@@ -1,0 +1,18 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/api/evosci-config/route": "/api/evosci-config",
+  "/api/memory/executions/route": "/api/memory/executions",
+  "/api/memory/observations/route": "/api/memory/observations",
+  "/api/memory/route": "/api/memory",
+  "/api/skills/catalog/route": "/api/skills/catalog",
+  "/api/skills/detail/route": "/api/skills/detail",
+  "/api/skills/install/route": "/api/skills/install",
+  "/api/skills/route": "/api/skills",
+  "/api/workspace/download/route": "/api/workspace/download",
+  "/api/workspace/file/route": "/api/workspace/file",
+  "/api/workspace/route": "/api/workspace",
+  "/api/workspace/upload/route": "/api/workspace/upload",
+  "/icon.png/route": "/icon.png",
+  "/page": "/"
+}

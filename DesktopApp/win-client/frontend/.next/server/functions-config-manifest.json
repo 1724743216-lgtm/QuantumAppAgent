@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "functions": {
+    "/api/memory": {},
+    "/api/memory/executions": {},
+    "/api/memory/observations": {},
+    "/api/skills/catalog": {},
+    "/api/skills/detail": {},
+    "/api/skills/install": {},
+    "/api/workspace": {},
+    "/api/workspace/download": {},
+    "/api/workspace/file": {},
+    "/api/workspace/upload": {}
+  }
+}
