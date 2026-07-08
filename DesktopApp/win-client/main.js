@@ -150,7 +150,7 @@ function startBackend() {
       : '';
 
     const args = app.isPackaged
-      ? ['-m', 'tyqa.cli', 'deploy', '--port', BACKEND_PORT.toString()]
+      ? ['-m', 'tyqa', 'deploy', '--port', BACKEND_PORT.toString()]
       : ['run', 'tyqa', 'deploy', '--port', BACKEND_PORT.toString()];
 
     console.log('Starting Python backend:', pythonExe, args.join(' '));
